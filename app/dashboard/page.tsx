@@ -3,81 +3,173 @@
 import React from "react";
 import Link from "next/link";
 import {
-  CalendarCheck,
-  Zap,
-  Clock,
-  ArrowUpRight,
-  CheckCircle2,
-  TrendingUp,
-  Play,
   PhoneIncoming,
-  Bot,
+  Clock,
+  CalendarCheck,
+  TrendingUp,
+  ArrowUpRight,
+  FileText,
+  User,
+  Phone,
+  Play,
   Sliders,
 } from "lucide-react";
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface MetricCard {
+  id: string;
+  label: string;
+  value: string;
+  change: string;
+  changeDirection: "up" | "down" | "neutral";
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor: string;
+  iconBg: string;
+}
+
+type CallOutcome = "Booked" | "Inquiry" | "Missed";
+
 interface RecentCall {
   id: string;
-  caller: string;
-  phone: string;
-  time: string;
+  callerPhone: string;
   duration: string;
-  intent: "Appointment" | "Emergency" | "Inquiry" | "Prescription";
-  status: "Completed" | "Booked" | "Transferred";
-  sentiment: "Positive" | "Neutral";
-  summary: string;
+  outcome: CallOutcome;
+  time: string;
 }
+
+interface UpcomingAppointment {
+  id: string;
+  customerName: string;
+  phoneNumber: string;
+  timeSlot: string;
+  date: string;
+}
+
+// ─── Mock Data ───────────────────────────────────────────────────────────────
+
+const metricCards: MetricCard[] = [
+  {
+    id: "total-calls",
+    label: "Total Calls Received",
+    value: "1,284",
+    change: "+12.5%",
+    changeDirection: "up",
+    icon: PhoneIncoming,
+    iconColor: "text-cyan-400",
+    iconBg: "bg-cyan-500/10 border-cyan-500/20",
+  },
+  {
+    id: "total-minutes",
+    label: "Total Minutes Used",
+    value: "342 mins",
+    change: "+8.2%",
+    changeDirection: "up",
+    icon: Clock,
+    iconColor: "text-amber-400",
+    iconBg: "bg-amber-500/10 border-amber-500/20",
+  },
+  {
+    id: "appointments-booked",
+    label: "Appointments Booked",
+    value: "89",
+    change: "+23.1%",
+    changeDirection: "up",
+    icon: CalendarCheck,
+    iconColor: "text-violet-400",
+    iconBg: "bg-violet-500/10 border-violet-500/20",
+  },
+  {
+    id: "conversion-rate",
+    label: "Call Conversion Rate",
+    value: "68%",
+    change: "+4.3%",
+    changeDirection: "up",
+    icon: TrendingUp,
+    iconColor: "text-emerald-400",
+    iconBg: "bg-emerald-500/10 border-emerald-500/20",
+  },
+];
 
 const recentCalls: RecentCall[] = [
   {
-    id: "call-9021",
-    caller: "Eleanor Vance",
-    phone: "+1 (415) 329-8812",
-    time: "2 mins ago",
+    id: "call-1001",
+    callerPhone: "+1 (415) 329-8812",
     duration: "2m 14s",
-    intent: "Appointment",
-    status: "Booked",
-    sentiment: "Positive",
-    summary: "Booked routine dental cleaning for Tuesday, Oct 14 at 10:30 AM with Dr. Smith.",
+    outcome: "Booked",
+    time: "2 mins ago",
   },
   {
-    id: "call-9020",
-    caller: "Marcus Brody",
-    phone: "+1 (510) 902-1144",
-    time: "14 mins ago",
+    id: "call-1002",
+    callerPhone: "+1 (510) 902-1144",
     duration: "1m 45s",
-    intent: "Inquiry",
-    status: "Completed",
-    sentiment: "Positive",
-    summary: "Inquired about insurance network compatibility (Delta Dental PPO accepted).",
+    outcome: "Inquiry",
+    time: "14 mins ago",
   },
   {
-    id: "call-9019",
-    caller: "Sophia Martinez",
-    phone: "+1 (408) 773-4521",
-    time: "32 mins ago",
+    id: "call-1003",
+    callerPhone: "+1 (408) 773-4521",
+    duration: "0m 32s",
+    outcome: "Missed",
+    time: "28 mins ago",
+  },
+  {
+    id: "call-1004",
+    callerPhone: "+1 (650) 412-8903",
     duration: "3m 05s",
-    intent: "Prescription",
-    status: "Transferred",
-    sentiment: "Neutral",
-    summary: "Requested post-op pain medication refill; routed to triage nurse queue.",
+    outcome: "Booked",
+    time: "1 hr ago",
   },
   {
-    id: "call-9018",
-    caller: "David Chen",
-    phone: "+1 (650) 412-8903",
+    id: "call-1005",
+    callerPhone: "+1 (925) 661-3347",
+    duration: "1m 18s",
+    outcome: "Inquiry",
     time: "1 hr ago",
-    duration: "1m 58s",
-    intent: "Appointment",
-    status: "Booked",
-    sentiment: "Positive",
-    summary: "Rescheduled root canal consultation to Friday, Oct 17 at 2:00 PM.",
   },
 ];
+
+const upcomingAppointments: UpcomingAppointment[] = [
+  {
+    id: "appt-1",
+    customerName: "Eleanor Vance",
+    phoneNumber: "+1 (415) 329-8812",
+    timeSlot: "10:30 AM – 11:00 AM",
+    date: "Today, Oct 9",
+  },
+  {
+    id: "appt-2",
+    customerName: "David Chen",
+    phoneNumber: "+1 (650) 412-8903",
+    timeSlot: "2:00 PM – 2:30 PM",
+    date: "Today, Oct 9",
+  },
+  {
+    id: "appt-3",
+    customerName: "Maria Rodriguez",
+    phoneNumber: "+1 (408) 556-7192",
+    timeSlot: "9:15 AM – 9:45 AM",
+    date: "Tomorrow, Oct 10",
+  },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const outcomeBadgeStyles: Record<CallOutcome, string> = {
+  Booked:
+    "bg-emerald-950/70 text-emerald-400 border border-emerald-800/50",
+  Inquiry:
+    "bg-sky-950/70 text-sky-400 border border-sky-800/50",
+  Missed:
+    "bg-rose-950/70 text-rose-400 border border-rose-800/50",
+};
+
+// ─── Page Component ──────────────────────────────────────────────────────────
 
 export default function DashboardOverviewPage() {
   return (
     <div className="space-y-6">
-      {/* Top Banner / Welcome */}
+      {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -91,7 +183,10 @@ export default function DashboardOverviewPage() {
           </div>
           <p className="mt-1 text-sm text-zinc-400">
             AI Receptionist &ldquo;Sarah&rdquo; is managing inbound calls for{" "}
-            <span className="font-medium text-zinc-200">Apex Health & Dental</span>.
+            <span className="font-medium text-zinc-200">
+              Apex Health &amp; Dental
+            </span>
+            .
           </p>
         </div>
 
@@ -99,7 +194,7 @@ export default function DashboardOverviewPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/agent-setup"
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs font-semibold text-zinc-200 shadow-sm hover:border-zinc-700 hover:bg-zinc-850 hover:text-white transition-all"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs font-semibold text-zinc-200 shadow-sm hover:border-zinc-700 hover:text-white transition-all"
           >
             <Sliders className="h-3.5 w-3.5 text-zinc-400" />
             <span>Tune Agent Prompt</span>
@@ -115,84 +210,63 @@ export default function DashboardOverviewPage() {
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* ── Top Metric Cards (4-grid) ───────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Calls */}
-        <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-5 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">Today&apos;s Calls</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/80 text-cyan-400 border border-zinc-700/50">
-              <PhoneIncoming className="h-4 w-4" />
+        {metricCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.id}
+              className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-5 backdrop-blur-sm transition-colors hover:border-zinc-700/80"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-zinc-400">
+                  {card.label}
+                </span>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${card.iconBg} ${card.iconColor}`}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="text-2xl font-bold tracking-tight text-white">
+                  {card.value}
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 text-xs">
+                  <span
+                    className={`flex items-center font-medium ${
+                      card.changeDirection === "up"
+                        ? "text-emerald-400"
+                        : card.changeDirection === "down"
+                        ? "text-rose-400"
+                        : "text-zinc-400"
+                    }`}
+                  >
+                    <TrendingUp className="h-3 w-3 mr-0.5" />
+                    {card.change}
+                  </span>
+                  <span className="text-zinc-500">vs last month</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-white">142</div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs">
-              <span className="flex items-center text-emerald-400 font-medium">
-                <TrendingUp className="h-3 w-3 mr-0.5" /> +18.4%
-              </span>
-              <span className="text-zinc-500">vs yesterday</span>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Resolution Rate */}
-        <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-5 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">AI Handled Rate</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/80 text-emerald-400 border border-zinc-700/50">
-              <CheckCircle2 className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-white">92.3%</div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs">
-              <span className="text-zinc-400">131 resolved without transfer</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Appointments Booked */}
-        <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-5 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">Appointments Booked</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/80 text-violet-400 border border-zinc-700/50">
-              <CalendarCheck className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-white">38</div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs">
-              <span className="text-emerald-400 font-medium">Synced with Cal.com</span>
-            </div>
-          </div>
-        </div>
-
-        {/* End-to-End Latency */}
-        <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-5 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">Avg Voice Latency</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800/80 text-amber-400 border border-zinc-700/50">
-              <Zap className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-white">460ms</div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs">
-              <span className="text-emerald-400 font-medium">Ultra-low latency</span>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* Main Grid: Recent Calls Feed & Agent Card */}
+      {/* ── Main Content Grid: Recent Calls + Upcoming Appointments ──── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent Call Logs Table / Feed (2 columns) */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 backdrop-blur-sm lg:col-span-2">
-          <div className="flex items-center justify-between pb-4 border-b border-zinc-800/70">
+        {/* ── Recent Call Activity Table (spans 2 cols) ────────────────── */}
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm lg:col-span-2">
+          {/* Section Header */}
+          <div className="flex items-center justify-between border-b border-zinc-800/70 px-5 py-4">
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">Live Call Activity</h2>
-              <p className="text-xs text-zinc-400">Real-time transcripts, intents, and action outcomes</p>
+              <h2 className="text-base font-semibold text-zinc-100">
+                Recent Call Activity
+              </h2>
+              <p className="text-xs text-zinc-400">
+                Last 5 inbound calls with outcomes
+              </p>
             </div>
             <Link
               href="/dashboard/calls"
@@ -202,124 +276,158 @@ export default function DashboardOverviewPage() {
             </Link>
           </div>
 
-          <div className="divide-y divide-zinc-800/60">
-            {recentCalls.map((call) => (
-              <div
-                key={call.id}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between py-3.5 transition-colors hover:bg-zinc-800/20 px-2 -mx-2 rounded-lg"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-zinc-200">
-                      {call.caller}
-                    </span>
-                    <span className="text-xs text-zinc-500 font-mono">
-                      {call.phone}
-                    </span>
-                    <span
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide ${
-                        call.status === "Booked"
-                          ? "bg-emerald-950/70 text-emerald-400 border border-emerald-800/50"
-                          : call.status === "Transferred"
-                          ? "bg-amber-950/70 text-amber-400 border border-amber-800/50"
-                          : "bg-zinc-800 text-zinc-300 border border-zinc-700/50"
-                      }`}
-                    >
-                      {call.status}
-                    </span>
-                  </div>
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-800/60">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                    Caller Phone
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                    Duration
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                    Outcome
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                    Time
+                  </th>
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 text-right">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                {recentCalls.map((call) => (
+                  <tr
+                    key={call.id}
+                    className="group transition-colors hover:bg-zinc-800/20"
+                  >
+                    {/* Caller Phone */}
+                    <td className="whitespace-nowrap px-5 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700/60 text-zinc-400">
+                          <Phone className="h-3 w-3" />
+                        </div>
+                        <span className="font-mono text-xs text-zinc-200">
+                          {call.callerPhone}
+                        </span>
+                      </div>
+                    </td>
 
-                  <p className="text-xs text-zinc-400 max-w-xl line-clamp-1">
-                    {call.summary}
-                  </p>
+                    {/* Duration */}
+                    <td className="whitespace-nowrap px-5 py-3.5">
+                      <span className="flex items-center gap-1 font-mono text-xs text-zinc-400">
+                        <Clock className="h-3 w-3 text-zinc-500" />
+                        {call.duration}
+                      </span>
+                    </td>
+
+                    {/* Outcome Badge */}
+                    <td className="whitespace-nowrap px-5 py-3.5">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${outcomeBadgeStyles[call.outcome]}`}
+                      >
+                        {call.outcome}
+                      </span>
+                    </td>
+
+                    {/* Time */}
+                    <td className="whitespace-nowrap px-5 py-3.5 text-xs text-zinc-500">
+                      {call.time}
+                    </td>
+
+                    {/* Action */}
+                    <td className="whitespace-nowrap px-5 py-3.5 text-right">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-850 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 transition-all hover:border-cyan-500/40 hover:text-cyan-400 hover:bg-zinc-800/80"
+                      >
+                        <FileText className="h-3 w-3" />
+                        <span>View Transcript</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Upcoming Appointments Widget (1 col) ─────────────────────── */}
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm">
+          {/* Section Header */}
+          <div className="flex items-center justify-between border-b border-zinc-800/70 px-5 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                <CalendarCheck className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-100">
+                  Upcoming Appointments
+                </h3>
+                <p className="text-[11px] text-zinc-400">
+                  Next 3 scheduled
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/appointments"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200 transition-colors"
+              title="View all appointments"
+            >
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          {/* Appointment List */}
+          <div className="divide-y divide-zinc-800/50 px-5">
+            {upcomingAppointments.map((appt) => (
+              <div key={appt.id} className="py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    {/* Avatar */}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-indigo-600 text-[11px] font-semibold text-white shadow-sm">
+                      {appt.customerName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-zinc-100">
+                        {appt.customerName}
+                      </p>
+                      <p className="flex items-center gap-1 text-[11px] text-zinc-400 font-mono">
+                        <Phone className="h-2.5 w-2.5" />
+                        {appt.phoneNumber}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-2 sm:mt-0 flex items-center justify-between sm:justify-end gap-3 text-xs text-zinc-400 shrink-0">
-                  <span className="flex items-center gap-1 font-mono text-zinc-500 text-[11px]">
-                    <Clock className="h-3 w-3" /> {call.duration}
+                <div className="mt-2.5 ml-12 flex items-center gap-2">
+                  <span className="rounded bg-zinc-800/80 border border-zinc-700/50 px-2 py-0.5 text-[10px] font-medium text-zinc-300">
+                    {appt.date}
                   </span>
-                  <span className="text-zinc-500 text-[11px]">{call.time}</span>
-                  <button
-                    type="button"
-                    className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 bg-zinc-850 text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/40 transition-colors"
-                    title="Play call audio recording"
-                  >
-                    <Play className="h-3 w-3 fill-current" />
-                  </button>
+                  <span className="text-[10px] text-zinc-400">
+                    {appt.timeSlot}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Active AI Agent Pipeline Configuration (1 column) */}
-        <div className="space-y-4">
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 backdrop-blur-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/70">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-100">Agent Configuration</h3>
-                  <p className="text-[11px] text-zinc-400">Active Receptionist Profile</p>
-                </div>
-              </div>
-              <span className="rounded bg-emerald-950/80 border border-emerald-800/50 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
-                Online
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3 text-xs">
-              <div className="flex items-center justify-between py-1.5 border-b border-zinc-800/50">
-                <span className="text-zinc-400">Receptionist Persona</span>
-                <span className="font-medium text-zinc-200">Sarah (Empathetic & Swift)</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 border-b border-zinc-800/50">
-                <span className="text-zinc-400">LLM Engine</span>
-                <span className="font-mono text-zinc-300 text-[11px]">Voxia-Turbo 2.5 (180ms)</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 border-b border-zinc-800/50">
-                <span className="text-zinc-400">Voice Synthesis</span>
-                <span className="font-medium text-zinc-300">ElevenLabs Turbo v2.5</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 border-b border-zinc-800/50">
-                <span className="text-zinc-400">Inbound Phone</span>
-                <span className="font-mono text-cyan-400 text-[11px]">+1 (415) 800-4291</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5">
-                <span className="text-zinc-400">Calendar Sync</span>
-                <span className="text-emerald-400 font-medium flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> Google & Cal.com
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-5 pt-3 border-t border-zinc-800/70">
-              <Link
-                href="/dashboard/agent-setup"
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-800/70 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-700/60 hover:text-white transition-colors"
-              >
-                <span>Edit Voice, Prompts & Knowledge Base</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Telephony Connection Health */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                <span className="text-xs font-semibold text-zinc-300">
-                  Carrier SIP & Webhook Status
-                </span>
-              </div>
-              <span className="text-[10px] text-zinc-500 font-mono">100% Uptime</span>
-            </div>
-            <p className="mt-1.5 text-[11px] text-zinc-400">
-              Inbound SIP Trunk connected to US-East Twilio gateway with automatic failover routing.
-            </p>
+          {/* Footer CTA */}
+          <div className="border-t border-zinc-800/70 px-5 py-3">
+            <Link
+              href="/dashboard/appointments"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-800/70 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-700/60 hover:text-white transition-colors"
+            >
+              <span>View All Appointments</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </div>
