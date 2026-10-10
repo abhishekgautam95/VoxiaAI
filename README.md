@@ -22,9 +22,11 @@ An autonomous AI voice receptionist that answers inbound calls, books appointmen
 | Feature | Description |
 |---|---|
 | **📊 Real-Time Dashboard** | Live KPI cards — total calls, minutes used, appointments booked, conversion rate — with trend indicators |
-| **📞 Call Activity Feed** | Tabular view of recent inbound calls with caller phone, duration, outcome badges (Booked / Inquiry / Missed), and one-click transcript access |
-| **📅 Appointment Widget** | Upcoming appointments sidebar showing customer name, phone, and time slot at a glance |
-| **🤖 Agent Configuration** | Tune your AI receptionist's persona, LLM engine, voice synthesis model, and knowledge base |
+| **📞 Call Activity Feed & Logs** | Tabular view of inbound calls with caller phone, duration, outcome badges (Booked / Inquiry / Missed), and slide-over transcript drawer |
+| **📅 Appointments Management** | Dual **List View** & **Calendar View** with status filters, top stats bar, quick reschedule & cancellation actions |
+| **📥 CSV Export & Manual Booking** | 1-click export of patient visits to CSV and modal dialog to manually add appointments with time slot selection |
+| **🤖 AI Agent Configuration** | Tabbed editor for business details, system prompt with industry routines, and ElevenLabs voice engine |
+| **🎙️ Live Web Call Test Widget** | Browser audio simulator with authentic telephone ringing tone, speech synthesis, animated audio waveform, and mic speech input |
 | **🏢 Multi-Org Switcher** | Manage multiple businesses/clinics from a single dashboard with per-org phone lines |
 | **📱 Responsive Layout** | Fully responsive sidebar + header shell with mobile hamburger menu and collapsible navigation |
 | **🔔 Live Status Indicators** | Real-time agent status (Live/Offline), SIP health, and voice-minute usage tracking |
@@ -39,6 +41,7 @@ An autonomous AI voice receptionist that answers inbound calls, books appointmen
 | **Styling** | [Tailwind CSS 4](https://tailwindcss.com/) with `@tailwindcss/turbopack` |
 | **Icons** | [Lucide React](https://lucide.dev/) |
 | **Fonts** | [Geist Sans & Geist Mono](https://vercel.com/font) via `next/font` |
+| **Audio & Speech** | Web Audio API (dial tone synthesis) & Web Speech API (`SpeechSynthesis` & `webkitSpeechRecognition`) |
 
 ## 📂 Project Structure
 
@@ -51,20 +54,34 @@ VoxiaAI/
 │   └── dashboard/
 │       ├── layout.tsx              # Dashboard shell wrapper
 │       ├── page.tsx                # Overview (metrics, calls, appointments)
-│       ├── calls/page.tsx          # Call logs
-│       ├── appointments/page.tsx   # Appointment management
-│       ├── agent-setup/page.tsx    # AI agent configuration
+│       ├── calls/page.tsx          # Call logs & transcript drawer
+│       ├── appointments/page.tsx   # Appointment management (List & Calendar view)
+│       ├── agent/page.tsx          # AI agent configuration & live web call test
 │       ├── analytics/page.tsx      # Analytics & ROI
 │       ├── phone-numbers/page.tsx  # Telephony / number management
-│       └── settings/page.tsx       # Account & preferences
+│       └── settings/page.tsx       # Account & telephony preferences
 ├── components/
 │   └── dashboard/
 │       ├── dashboard-shell.tsx     # Sidebar + Header + content wrapper
 │       ├── sidebar.tsx             # Navigation sidebar with live status
-│       └── header.tsx              # Top bar with org switcher & profile
+│       ├── header.tsx              # Top bar with org switcher & profile
+│       ├── agent/                  # AI Agent Configuration components
+│       │   ├── business-details-tab.tsx  # Business identity & category form
+│       │   ├── system-prompt-tab.tsx     # Monospace editor & pre-made routines
+│       │   ├── voice-settings-tab.tsx    # ElevenLabs voice library & previews
+│       │   ├── tools-tab.tsx             # Calendar tools & HIPAA compliance
+│       │   ├── live-test-widget.tsx      # Web audio call simulator & waveform
+│       │   ├── types.ts                  # Agent configuration TypeScript interfaces
+│       │   └── data.ts                   # Routines, categories & voice catalog
+│       └── appointments/           # Appointments components
+│           ├── appointments-table.tsx    # Filterable data table with quick actions
+│           ├── calendar-view.tsx         # Monthly interactive calendar grid
+│           ├── add-appointment-modal.tsx # Manual visit booking dialog
+│           ├── reschedule-modal.tsx      # Quick date/time reschedule modal
+│           ├── types.ts                  # Appointment data models
+│           └── mock-data.ts              # Clinic services & schedule seed data
 ├── public/                         # Static assets
 ├── next.config.ts                  # Next.js + Turbopack configuration
-├── tailwind.config.ts              # Tailwind CSS configuration
 ├── tsconfig.json                   # TypeScript config
 └── package.json
 ```
@@ -92,6 +109,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to the dashboard automatically.
 
+### Key Pages to Explore
+
+- 📊 **Dashboard Overview**: [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
+- 🤖 **AI Agent Setup**: [http://localhost:3000/dashboard/agent](http://localhost:3000/dashboard/agent)
+- 📅 **Appointments Schedule**: [http://localhost:3000/dashboard/appointments](http://localhost:3000/dashboard/appointments)
+- 📞 **Call Logs**: [http://localhost:3000/dashboard/calls](http://localhost:3000/dashboard/calls)
+
 ### Available Scripts
 
 | Command | Description |
@@ -103,14 +127,17 @@ Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to 
 
 ## 🗺 Roadmap
 
+- [x] Voice call simulator with live audio, transcript & animated waveform
+- [x] Multi-language voice agent support (10 locales)
+- [x] Pre-made prompt routines (Appointment Booking, Customer Care, Real Estate, etc.)
+- [x] Appointments management with List View, Monthly Calendar View, and CSV export
+- [x] Reschedule & Cancel quick actions with automated modal workflows
 - [ ] Backend API integration (call logs, appointments, analytics)
 - [ ] Real-time WebSocket call activity stream
-- [ ] Voice call simulator with live transcript
-- [ ] Calendar integration (Google Calendar, Cal.com)
-- [ ] Authentication & role-based access control
+- [ ] Live Calendar sync (Google Calendar OAuth, Cal.com webhooks)
+- [ ] Authentication & role-based access control (RBAC)
 - [ ] Stripe billing & usage metering
-- [ ] Twilio / SIP trunk integration
-- [ ] Multi-language voice agent support
+- [ ] Twilio / Telnyx SIP trunk integration
 
 ## 🤝 Contributing
 
