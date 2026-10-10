@@ -308,7 +308,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                 </a>
 
                 <a
-                  href="/dashboard/agent-setup"
+                  href="/dashboard/agent"
                   className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-800/70 hover:text-white transition-colors"
                 >
                   <Mic className="h-3.5 w-3.5 text-zinc-400" />

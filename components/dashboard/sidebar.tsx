@@ -46,7 +46,7 @@ const primaryNavItems: NavItem[] = [
   },
   {
     title: "AI Agent Setup",
-    href: "/dashboard/agent-setup",
+    href: "/dashboard/agent",
     icon: Bot,
   },
   {

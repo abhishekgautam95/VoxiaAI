@@ -9,7 +9,6 @@ import {
   TrendingUp,
   ArrowUpRight,
   FileText,
-  User,
   Phone,
   Play,
   Sliders,
@@ -193,7 +192,7 @@ export default function DashboardOverviewPage() {
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard/agent-setup"
+            href="/dashboard/agent"
             className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs font-semibold text-zinc-200 shadow-sm hover:border-zinc-700 hover:text-white transition-all"
           >
             <Sliders className="h-3.5 w-3.5 text-zinc-400" />
