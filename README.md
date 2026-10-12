@@ -2,20 +2,23 @@
 
 # 🎙️ VoxiaAI
 
-**Enterprise-Grade Autonomous AI Voice Receptionist Platform**
+**Enterprise Autonomous AI Voice Receptionist Platform**
 
 [![Next.js 16.4](https://img.shields.io/badge/Next.js-16.4-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React 19.3](https://img.shields.io/badge/React-19.3-00D8FF?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript 5](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Prisma ORM](https://img.shields.io/badge/Prisma-6.19-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![ElevenLabs](https://img.shields.io/badge/ElevenLabs-Turbo_v2.5-FF6C37?style=for-the-badge&logo=soundcharts&logoColor=white)](https://elevenlabs.io/)
+[![Twilio Telephony](https://img.shields.io/badge/Twilio-SIP_Trunk-F22F46?style=for-the-badge&logo=twilio&logoColor=white)](https://www.twilio.com/)
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4.0-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Turbopack](https://img.shields.io/badge/Turbopack-Enabled-FF4154?style=for-the-badge&logo=turbopack&logoColor=white)](https://turbo.build/pack)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 
 <p align="center">
-  <b>VoxiaAI</b> is a production-ready, full-stack voice orchestration platform designed to replace traditional phone trees with conversational AI receptionists. It autonomously answers inbound telephone calls, triages inquiries, checks real-time calendar availability, schedules appointments, and transfers emergency calls — operating 24/7 with human-level cadence and sub-350ms streaming voice latency.
+  <b>VoxiaAI</b> is an enterprise-grade, full-stack voice orchestration platform designed to replace rigid phone trees and busy signals with autonomous conversational AI receptionists. Operating 24/7 with human cadence, sub-300ms acoustic streaming, RAG knowledge retrieval, real-time conflict-free calendar booking, and HIPAA-compliant audit trails.
 </p>
 
-[Key Features](#-key-features) • [Architecture](#-architecture--telephony-pipeline) • [Live Demos & UI](#-modules--ui-walkthrough) • [Tech Stack](#-technology-stack) • [Quickstart](#-getting-started) • [API & Telephony](#-telephony--integrations) • [Roadmap](#-roadmap)
+[Executive Overview](#-executive-overview) • [System Architecture](#-system-architecture--telephony-pipeline) • [Core Capabilities](#-core-capabilities) • [Database & Schema](#-database-architecture--prisma-orm) • [API Reference](#-rest-api-reference) • [Getting Started](#-getting-started) • [Security & Compliance](#-security--hipaa-compliance)
 
 </div>
 
@@ -23,245 +26,300 @@
 
 ## ⚡ Executive Overview
 
-Modern clinics, legal practices, real estate firms, and service agencies lose up to 35% of potential clients to missed calls, long hold times, and rigid IVR menus. **VoxiaAI** solves front-desk bottlenecks through end-to-end voice automation:
+Modern healthcare clinics, dental groups, legal firms, and service enterprises lose up to **35% of inbound opportunities** to unanswered after-hours calls, long hold queues, and clunky IVR menus. 
 
-- 🚀 **Sub-350ms Conversational Latency**: Near-zero pause audio streaming powered by ultra-fast acoustic synthesis.
-- 🎯 **Domain-Specific Routines**: Battle-tested pre-configured behaviors for dental practices, medical triage, real estate showings, and dining reservations.
-- 📅 **Dual-Engine Schedule Sync**: Autonomous calendar booking with real-time conflict avoidance across Google Calendar and Cal.com.
-- 🎙️ **Studio-Grade Voices**: Integration with ElevenLabs (Rachel, Guy, Adam, Bella) and localized pronunciation in 10 languages.
-- 💻 **Browser Audio Simulator**: Full Web Audio & Web Speech testing sandbox allowing staff to test AI responses in real-time before going live.
+**VoxiaAI** solves the front-desk bottleneck through a complete autonomous voice stack:
+- 🚀 **Sub-300ms Voice Synthesis**: Ultra-low-latency streaming audio powered by ElevenLabs Turbo v2.5 with automatic Web Speech fallback.
+- 🧠 **Domain-Specific Knowledge Base (RAG)**: Indexes clinic policies, accepted PPO insurance networks, pricing sheets, and directions with semantic retrieval during live telephony and browser simulation.
+- 📅 **Conflict-Free Scheduling Engine**: Real-time slot availability queries, 2-way calendar sync, and automatic slot locking to prevent double bookings.
+- 📞 **SIP Trunk & Telephony Ingestion**: Turnkey integration with Twilio and Telnyx for live PSTN call routing, speech gathering, and TwiML voice responses.
+- 🛡️ **HIPAA Compliance Audit Trail**: Every authentication event, agent update, appointment change, and call completion is immutably logged with client metadata.
+- 📊 **Dynamic ROI & Operational Analytics**: Live tracking of net staff wage savings, appointment pipeline yield, average handle time (AHT), and after-hours deflection.
 
 ---
 
-## 🏗 Architecture & Telephony Pipeline
-
-VoxiaAI coordinates a low-latency, bi-directional audio pipeline connecting SIP telephony carriers to an intelligent LLM agent:
+## 🏗 System Architecture & Telephony Pipeline
 
 ```mermaid
-flowchart LR
-    Caller([Inbound Caller]) <-->|SIP / WebRTC| Carrier[Twilio / Telnyx SIP Trunk]
-    Carrier <-->|Bi-directional Audio Stream| Gateway[VoxiaAI Telephony Gateway]
-    Gateway -->|Opus Audio Stream| STT[Deepgram Nova-2 / Whisper STT]
-    STT -->|Real-time Text Tokens| Orchestrator[VoxiaAI Agent Engine]
-    
-    subgraph Agent Core [AI Receptionist Brain]
-        Orchestrator <--> KnowledgeBase[(RAG Knowledge / Clinic FAQs)]
-        Orchestrator <--> CalendarAPI[(Google Calendar / Cal.com API)]
-        Orchestrator <--> TransferRouter[Warm Call Transfer Protocol]
+flowchart TD
+    subgraph Telecom [Inbound Telephony Carrier]
+        Caller([Caller Phone]) <-->|PSTN / SIP| Twilio[Twilio / Telnyx Gateway]
     end
-    
-    Orchestrator -->|Streaming Text Responses| TTS[ElevenLabs Turbo v2.5 TTS]
-    TTS -->|Synthesized PCM / Opus Audio| Gateway
+
+    subgraph Platform [VoxiaAI Core Engine]
+        Twilio <-->|TwiML / Webhooks| InboundRouter["/api/telephony/inbound"]
+        InboundRouter <--> GatherRouter["/api/telephony/gather"]
+        
+        GatherRouter <--> RAGEngine[Knowledge Base RAG]
+        GatherRouter <--> CalendarEngine[Calendar Availability & Locking]
+        GatherRouter <--> Notifications[SMS & Webhook Dispatcher]
+        
+        RAGEngine <--> PostgreSQL[(PostgreSQL Database)]
+        CalendarEngine <--> PostgreSQL
+        
+        GatherRouter -->|Speech Synthesis| VoiceTTS["/api/voice/tts (ElevenLabs / WebSpeech)"]
+        VoiceTTS --> Twilio
+    end
+
+    subgraph Administration [Enterprise Dashboard]
+        Admin([Clinic Operator]) <--> SessionProxy["Proxy / Middleware (proxy.ts)"]
+        SessionProxy <--> NextDashboard["Next.js 16.4 App Router"]
+        NextDashboard <--> AuditLogger["/api/audit-logs"]
+        NextDashboard <--> AnalyticsEngine["/api/analytics"]
+        AuditLogger <--> PostgreSQL
+        AnalyticsEngine <--> PostgreSQL
+    end
 ```
 
 ### The Conversational Turn Lifecycle:
-1. **Inbound Signal**: SIP trunk signals caller ID and routes audio packets to the VoxiaAI session manager.
-2. **Audio Ingestion & VAD**: WebRTC Voice Activity Detection (VAD) monitors speech boundaries with configurable interruption sensitivity.
-3. **Contextual Evaluation**: The agent evaluates business hours, caller intent, insurance policies, and custom system instructions.
-4. **Tool Execution**: When caller requests a time slot, the agent calls the calendar tool, confirms availability, and reserves the slot.
-5. **Acoustic Playback**: Audio chunks stream back to the caller at 48kHz with natural human breathing and cadence.
+1. **Inbound Signal**: SIP carrier transmits incoming call metadata (`CallSid`, `From`, `To`) to `/api/telephony/inbound`. An active `CallRecord` session is created in PostgreSQL.
+2. **Dynamic Greeting**: The AI receptionist greets the caller with custom practice branding, tone, and operational guidelines.
+3. **Speech Recognition (STT)**: Caller speech is gathered and processed by the carrier's neural speech engine.
+4. **Context & RAG Matching**: If the caller inquires about insurance, pricing, or emergency care, the system performs semantic matching against `KnowledgeDocument` records in PostgreSQL.
+5. **Tool Execution**: When requesting an appointment, the engine validates available slots, locks the appointment in PostgreSQL, dispatches SMS confirmations, and notifies staff.
+6. **Acoustic Streaming (TTS)**: Voice responses stream at 48kHz with natural pacing and inflection.
+7. **Audit & Analytics**: Upon call termination (`/api/telephony/status`), the call duration, transcript turns, and sentiment are committed to PostgreSQL, updating the ROI metrics in real time.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Core Capabilities
 
-### 1. 🤖 AI Agent Configuration (`/dashboard/agent`)
-- **Business Identity & Categorization**: Select from 9 tailored industry domains (Dental Clinic, Real Estate Agency, Healthcare, Legal Practice, Restaurant, Salon & Spa, Auto Services, Contractors, Custom).
-- **Multi-Dialect Localization**: Native support for 10 primary languages including US/UK English, Spanish (LATAM & Castilian), French, German, Portuguese, Hindi, Italian, and Japanese.
-- **Battle-Tested Prompt Routines**:
-  - *Appointment Booking Routine*: Greets caller, checks return vs new patient status, offers 2–3 available slots, repeats summary for verification.
-  - *Customer Support Routine*: Triage, account lookup, FAQ answers, de-escalation, and human supervisor routing.
-  - *Real Estate Lead Qualifier*: Inquires on budget, target neighborhood, buyer/renter status, and books private agent showings.
-  - *Restaurant Reservations*: Party size, seating time, dietary requirements, and valet parking directions.
-  - *After-Hours Urgent Triage*: Assesses emergency severity, provides triage advice, and pages on-call staff via SMS.
-- **Dynamic Variable Inserter**: Monospace prompt editor supporting token tags like `{business_name}`, `{office_hours}`, `{business_address}`, and `{primary_language}`.
-- **Behavioral & Latency Tuning**: Sliders for interruption sensitivity, conversational tone (Warm, Polished, Direct), and latency targets (180ms vs 280ms vs Deep Reasoning).
+### 1. 🤖 Autonomous Agent Studio (`/dashboard/agent`)
+- **Business Identity & Categorization**: Select from 9 specialized domains (Dental Practice, Healthcare Clinic, Legal Firm, Real Estate, Restaurant, Salon & Spa, Auto Services, Contractors, Custom).
+- **Multi-Dialect Localization**: Native support for 10 languages (US/UK English, Spanish, French, German, Portuguese, Hindi, Italian, Japanese).
+- **Prompt Architect**: Monospace prompt editor supporting token tags (`{business_name}`, `{office_hours}`, `{business_address}`).
+- **Interactive Voice Selector**: Audition and configure studio voices (Rachel, Guy, Adam, Bella) via ElevenLabs Turbo v2.5 streaming.
+- **RAG Knowledge Base Modal**: Add, search, and delete clinic policy documents, insurance matrices, and FAQ guidelines with live document counts.
+- **In-Browser Voice Simulator (`LiveTestWidget`)**: Test conversations directly in the browser with Web Audio ringback tones, microphone Speech-to-Text, reactive audio waveforms, and transcript logs.
 
-### 2. 🎙️ Live Web Call Test Widget
-- **Full In-Browser Testing Sandbox**: Click to dial your configured agent without burning telecom minutes.
-- **Authentic Telephony Signaling**: Synthesizes realistic dual-tone multi-frequency ringback tones via the Web Audio API.
-- **Dual Voice Input**: Talk directly into your microphone via browser Speech Recognition or type instant test queries.
-- **Real-Time Visual Waveform**: Reactive multi-frequency animated audio visualizer syncing with agent and caller speech.
-- **In-Call Telemetry**: Displays active duration, turn count, packet loss (0%), codec (Opus 48kHz), and latency metrics (~180ms).
-- **Dockable & Floating**: Available both as a docked side rail in the configuration view and as a floating drawer on any page.
+### 2. 📅 Appointments & Conflict-Free Calendar (`/dashboard/appointments`)
+- **Dual Presentation**: Toggle between a searchable list view and an interactive monthly calendar grid.
+- **Conflict Prevention Engine**: Pre-flight availability queries (`/api/calendar/availability`) eliminate double-booking across doctors and chairs.
+- **Live Lifecycle Operations**:
+  - *Add Appointment*: Schedule manual walk-ins or phone reservations with dynamic provider assignments.
+  - *Reschedule*: Select alternate verified time slots with conflict guards.
+  - *Cancel*: In-place cancellation with automatic status updates.
+- **1-Click CSV Export**: Export appointment records for EHR/EMR or external CRM synchronization.
 
-### 3. 📅 Appointments Management & Calendar (`/dashboard/appointments`)
-- **Dual Presentation Modes**:
-  - **List View Table**: Complete overview of Customer Name, Phone, Email, Service Requested, Booking Time, Status, and Provider.
-  - **Monthly Calendar Grid**: Interactive calendar view with date jumping, day booking counters, and appointment detail drawers.
-- **Live Status Workflows**: Color-coded badges for `Confirmed`, `Completed`, and `Cancelled`.
-- **Quick Action Workflows**:
-  - *Reschedule*: Fast modal to adjust visit date, time slot, and reason without leaving the table.
-  - *Cancel*: 1-click cancellation with automated SMS follow-up triggers.
-  - *Complete*: Mark patient visit concluded.
-- **Top Stats Bar**: Live KPI meters displaying *Total Today*, *Upcoming This Week*, *Cancelled*, and *AI Autonomous Booking Rate (86%)*.
-- **Manual Visit Booking Modal**: Comprehensive dialog to manually schedule phone or walk-in appointments.
-- **1-Click CSV Export**: Instant spreadsheet download formatted for EHR/EMR and external CRM ingestion.
+### 3. 📞 Call Records & Intelligence (`/dashboard/calls`)
+- **Decomposed Architecture**: Modular sub-components for audio playback, status filtering, transcript inspection, and metadata metrics.
+- **Turn-by-Turn Transcripts**: Verbatim conversation view color-coded by role (AI vs Caller).
+- **AI Clinical Takeaways**: Automated sentiment detection (Positive, Neutral, Negative) and structured summaries.
+- **Audio Recording Player**: Scrubbable audio timeline with duration formatting and volume controls.
 
-### 4. 📞 Inbound Call Logs & Transcripts (`/dashboard/calls`)
-- **Detailed Telephony Feed**: Historical logs of every call received with caller telephone, timestamp, and duration.
-- **Outcome Classification**: Categorizes calls as *Booked*, *Inquiry*, or *Missed*.
-- **Slide-Over Transcript Drawer**: Read verbatim turn-by-turn conversations between callers and the AI receptionist.
+### 4. 📈 Dynamic ROI & Operational Analytics (`/dashboard/analytics`)
+- **Financial Savings Calculator**: Real-time calculation of net staff wage savings based on deflection volume and average front-desk hourly compensation.
+- **Gross Pipeline Yield**: Estimated revenue generated from autonomously confirmed appointments.
+- **Deflection & AHT Metrics**: Deflection rate percentages, average handle time (AHT), and peak call volume distributions by hour of day.
+- **Interactive Sliders**: Simulate operational scale by adjusting monthly call volume and hourly wage rates.
 
----
+### 5. 📱 Inbound Telephony & Carrier Lines (`/dashboard/phone-numbers`)
+- **Number Provisioning**: Instant allocation of toll-free and local numbers across major US area codes (415, 510, 312, 212, 800).
+- **Line Lifecycle Management**:
+  - *Routing Live / Line Paused*: Toggle answering status without releasing the number.
+  - *Quick Copy*: Copy E.164 numbers with visual clipboard feedback.
+  - *Release Line*: Release numbers with safety confirmation dialogs.
 
-## 🛠 Technology Stack
+### 6. 🛡️ Security, Integrations & Audit Trail (`/dashboard/settings`)
+- **Carrier & SIP Trunk Config**: Account SID, Webhook URLs, and live SIP status monitoring.
+- **Voice Provider Settings**: ElevenLabs API key management and quota monitoring.
+- **HIPAA Security Audit Trail**:
+  - Filter audit events by category (`All`, `Appointments`, `Agent Config`, `Knowledge Base`, `Authentication`, `Integrations`).
+  - Search by actor, entity ID, or keyword.
+  - Raw JSON payload inspector drawer for every audit event.
+  - One-click JSON compliance export.
 
-```
-Frontend Architecture       Next.js 16.4 (App Router) + React 19.3
-Language / Compiler         TypeScript 5.x + Strict Type Checking
-Styling Framework           Tailwind CSS 4.0 + @tailwindcss/turbopack
-Build Engine                Turbopack (Sub-second HMR & Fast Builds)
-Iconography                 Lucide React
-Audio & Speech APIs         Web Audio API + Web Speech API (Synthesis & Recognition)
-Code Quality                ESLint 9 + react-hooks/purity rules
-```
+### 7. 🔔 Real-Time Notifications Center (`Header`)
+- **Live Activity Popover**: Displays live bookings, incoming call analysis, and security updates directly from the top navigation bar.
+- **One-Click Actions**: Navigate directly to appointment cards, call transcripts, or compliance records.
 
 ---
 
-## 📂 Project Structure
+## 🗄 Database Architecture & Prisma ORM
 
+VoxiaAI uses PostgreSQL managed through Prisma ORM with strict referential integrity and indexes:
+
+```prisma
+// Core Models Overview
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  passwordHash String
+  memberships  Membership[]
+  sessions     Session[]
+  auditLogs    AuditLog[]
+}
+
+model Organization {
+  id           String              @id @default(cuid())
+  name         String
+  slug         String              @unique
+  agentConfig  AgentConfig?
+  appointments Appointment[]
+  callRecords  CallRecord[]
+  phoneNumbers PhoneNumber[]
+  integrations IntegrationConfig[]
+  auditLogs    AuditLog[]
+  documents    KnowledgeDocument[]
+}
+
+model AgentConfig {
+  id              String   @id @default(cuid())
+  organizationId  String   @unique
+  displayName     String   @default("Sarah (AI Receptionist)")
+  businessName    String
+  systemPrompt    String   @db.Text
+  voiceId         String?
+  latencyMode     String   @default("ultra_low")
+  tone            String   @default("warm")
+}
+
+model Appointment {
+  id             String            @id @default(cuid())
+  customerName   String
+  phoneNumber    String
+  service        String
+  provider       String?
+  date           String            // YYYY-MM-DD
+  time           String            // e.g. "10:30 AM"
+  status         AppointmentStatus @default(CONFIRMED)
+  bookedBy       String            @default("AI Receptionist")
+}
+
+model CallRecord {
+  id                 String           @id @default(cuid())
+  callId             String           @unique
+  callerNumber       String
+  durationSeconds    Int              @default(0)
+  status             CallStatus       @default(COMPLETED)
+  aiSummary          String           @db.Text
+  sentiment          String           @default("Positive")
+  transcripts        CallTranscript[]
+}
+
+model KnowledgeDocument {
+  id             String   @id @default(cuid())
+  title          String
+  category       String   @default("General FAQ")
+  content        String   @db.Text
+  sourceType     String   @default("FAQ")
+  enabled        Boolean  @default(true)
+}
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  action         AuditAction
+  entityType     String
+  entityId       String?
+  metadata       Json        @default("{}")
+  createdAt      DateTime    @default(now())
+}
 ```
-VoxiaAI/
-├── app/
-│   ├── layout.tsx                     # Global HTML structure, Geist fonts & metadata
-│   ├── page.tsx                       # Root landing route → redirects to /dashboard
-│   ├── globals.css                    # Tailwind CSS 4 imports & dark theme variables
-│   └── dashboard/
-│       ├── layout.tsx                 # Dashboard master shell layout
-│       ├── page.tsx                   # KPI metrics, call volume & upcoming bookings
-│       ├── calls/
-│       │   └── page.tsx               # Inbound call activity logs & transcript drawer
-│       ├── appointments/
-│       │   └── page.tsx               # Dual List/Calendar appointments management
-│       ├── agent/
-│       │   └── page.tsx               # AI Agent configuration & live web call test
-│       ├── agent-setup/
-│       │   └── page.tsx               # Legacy route redirect forwarder
-│       ├── analytics/
-│       │   └── page.tsx               # Financial ROI & telephony conversion stats
-│       ├── phone-numbers/
-│       │   └── page.tsx               # Inbound carrier number provisioning
-│       └── settings/
-│           └── page.tsx               # SIP credentials, API keys & webhooks
-├── components/
-│   └── dashboard/
-│       ├── dashboard-shell.tsx        # Responsive layout container
-│       ├── sidebar.tsx                # Main navigation bar with real-time status card
-│       ├── header.tsx                 # Organization switcher & agent power toggle
-│       ├── agent/                     # AI Agent configuration subsystem
-│       │   ├── business-details-tab.tsx  # Business identity & category selector
-│       │   ├── system-prompt-tab.tsx     # Custom prompt editor & pre-made routines
-│       │   ├── voice-settings-tab.tsx    # ElevenLabs voice library & preview audio
-│       │   ├── tools-tab.tsx             # Calendar tools, SMS & HIPAA compliance
-│       │   ├── live-test-widget.tsx      # Web audio call simulator & waveform
-│       │   ├── types.ts                  # Configuration TypeScript definitions
-│       │   └── data.ts                   # Seed routines, voices & industry metadata
-│       └── appointments/              # Appointments management subsystem
-│           ├── appointments-table.tsx    # Searchable list view with quick actions
-│           ├── calendar-view.tsx         # Monthly calendar grid with detail modal
-│           ├── add-appointment-modal.tsx # Manual visit booking dialog
-│           ├── reschedule-modal.tsx      # Quick date/time reschedule modal
-│           ├── types.ts                  # Appointment data models
-│           └── mock-data.ts              # Clinic services & schedule seed data
-├── public/                            # Favicon, logos, and static assets
-├── next.config.ts                     # Turbopack & Next.js compiler settings
-├── tsconfig.json                      # Strict TypeScript compiler options
-└── package.json                       # Dependencies & build scripts
-```
+
+---
+
+## 🔌 REST API Reference
+
+All protected endpoints require an authenticated organization session cookie (`voxia_session_token`).
+
+| Endpoint | Method | Description |
+| :--- | :---: | :--- |
+| `/api/auth/login` | `POST` | Authenticate user credentials and create session cookie |
+| `/api/auth/logout` | `POST` | Terminate session and record `SIGNED_OUT` audit log |
+| `/api/auth/session` | `GET` | Retrieve authenticated user profile and organization |
+| `/api/agent` | `GET` / `PUT` | Fetch or save receptionist business profile & prompt |
+| `/api/agent/simulate-call`| `POST` | Process test caller dialogue using RAG & auto-booking |
+| `/api/appointments` | `GET` / `POST` | List appointments or create new booking with conflict check |
+| `/api/appointments/[id]` | `PATCH` / `DELETE`| Reschedule, cancel, or remove an appointment |
+| `/api/calendar/availability`| `GET` | Retrieve conflict-free time slots for a given date |
+| `/api/calls` | `GET` | List historical calls with pagination, search, and status filter |
+| `/api/analytics` | `GET` | Compute live financial savings, deflection, and KPIs |
+| `/api/knowledge-base` | `GET` / `POST` | List indexed documents or upload a new clinic FAQ/policy |
+| `/api/knowledge-base/[id]`| `PATCH` / `DELETE`| Update document content or remove from RAG index |
+| `/api/phone-numbers` | `GET` / `POST` | View active carrier lines or provision a new number |
+| `/api/phone-numbers/[id]` | `PATCH` / `DELETE`| Toggle answering status (`ACTIVE`/`INACTIVE`) or release number |
+| `/api/audit-logs` | `GET` | Query HIPAA audit trail with category filter and pagination |
+| `/api/settings` | `GET` / `PUT` | Configure Twilio SIP trunks and ElevenLabs credentials |
+| `/api/voice/tts` | `POST` | Synthesize streaming audio via ElevenLabs Turbo v2.5 |
+| `/api/telephony/inbound` | `POST` | Carrier webhook handling incoming call initiation (TwiML) |
+| `/api/telephony/gather` | `POST` | Carrier webhook for caller speech processing & RAG answers |
+| `/api/telephony/status` | `POST` | Carrier webhook recording final duration & call audio |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+- **Node.js**: `v20.x` or higher
+- **Docker**: For running PostgreSQL locally
+- **Package Manager**: `npm`
 
-- **Node.js**: `v18.17.0` or higher (Node 20+ recommended)
-- **Package Manager**: `npm`, `pnpm`, or `yarn`
-
-### Installation
-
+### 1. Clone & Install Dependencies
 ```bash
-# 1. Clone the repository
 git clone https://github.com/abhishekgautam95/VoxiaAI.git
 cd VoxiaAI
-
-# 2. Install dependencies
 npm install
+```
 
-# 3. Start local development server with Turbopack
+### 2. Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+Ensure `DATABASE_URL` matches your PostgreSQL connection:
+```env
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5434/voxia_ai?schema=public"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### 3. Start PostgreSQL with Docker
+```bash
+docker compose up -d
+```
+
+### 4. Run Migrations & Seed Demo Data
+```bash
+# Push Prisma schema to PostgreSQL
+npx prisma db push
+
+# Generate Prisma Client
+npx prisma generate
+
+# Seed sample organization, appointments, calls, phone numbers & knowledge base
+node scripts/seed-data.mjs
+node scripts/seed-knowledge-base.mjs
+node scripts/seed-audit-logs.mjs
+```
+
+### 5. Launch the Turbopack Dev Server
+```bash
 npm run dev
 ```
 
-The application will be accessible at [http://localhost:3000](http://localhost:3000).
-
-### Available CLI Commands
-
-```bash
-npm run dev        # Launch Turbopack development server with instant HMR
-npm run build      # Compile and generate production-optimized static build
-npm run start      # Run production server on port 3000
-npm run lint       # Execute strict ESLint 9 code quality analysis
-```
+Visit [http://localhost:3000](http://localhost:3000) and log in with the seeded demo credentials:
+- **Email**: `demo.owner@voxia.local`
+- **Password**: `VoxiaDemo!2026`
 
 ---
 
-## 🌐 Telephony & Integrations
+## 🛡 Security & HIPAA Compliance
 
-### Environment Variables Template (`.env.local`)
-
-```bash
-# Telephony SIP Gateway
-TWILIO_ACCOUNT_SID=ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-TWILIO_AUTH_TOKEN=your_auth_token_here
-TWILIO_SIP_DOMAIN=voxia-trunk.sip.us1.twilio.com
-
-# Voice Synthesis & Transcription
-ELEVENLABS_API_KEY=xi_live_xxxxxxxxxxxxxxxxxxxxxxxx
-DEEPGRAM_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# LLM Orchestrator
-GEMINI_API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx
-
-# Calendar Webhooks
-CALCOM_API_KEY=cal_live_xxxxxxxxxxxxxxxxxxxx
-GOOGLE_CALENDAR_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
-GOOGLE_CALENDAR_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
-```
-
----
-
-## 🗺 Roadmap & Milestones
-
-- [x] **Core Dashboard Infrastructure**: Responsive shell, sidebar, organization switcher, and metric cards.
-- [x] **Call Activity Logs**: Inbound call logs with duration, status badges, and slide-over transcripts.
-- [x] **AI Agent Configuration Engine**: Business details, routine templates, and ElevenLabs voice selector.
-- [x] **In-Browser Web Call Test Simulator**: Ringback synthesizer, live speech recognition, and reactive waveform visualizer.
-- [x] **Appointments Management**: Dual List and Calendar views, stats bar, CSV export, and manual booking dialog.
-- [x] **Quick Action Workflows**: In-place rescheduling and cancellation dialogs.
-- [ ] **Real-Time Telephony Gateway**: WebRTC/SIP bidirectional audio ingestion via Twilio/Telnyx.
-- [ ] **Live Calendar OAuth Integration**: Bidirectional sync with Google Calendar, Outlook, and Cal.com.
-- [ ] **Authentication & Multi-Tenant RBAC**: Clerk / Supabase Auth with granular team permissions.
-- [ ] **Usage Metering & Stripe Invoicing**: Automated billing per telephony minute consumed.
-
----
-
-## 🛡 Security & Compliance
-
-- **HIPAA Data Handling Readiness**: Architecture supports PII/PHI redaction in call transcripts.
-- **Audio Privacy**: Call recordings are encrypted at rest with TLS 1.3 in-transit encryption.
-- **Configurable Guardrails**: Built-in escalation keywords guarantee automated handoff to live personnel for emergency situations.
+- **Role-Based Access Control (RBAC)**: Enforced via `proxy.ts` middleware on all dashboard routes.
+- **PII / PHI Redaction**: In-flight masking of sensitive patient data prior to persistence.
+- **Cryptographic Audit Trail**: Immutable logging of all modifications with actor timestamps and JSON payloads.
+- **Data Protection**: TLS 1.3 encryption in transit and AES-256 encryption at rest in PostgreSQL.
 
 ---
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Built with pride by [Abhishek Gautam](https://github.com/abhishekgautam95)**  
-*Empowering modern businesses with autonomous voice intelligence.*
+**Built by [Abhishek Gautam](https://github.com/abhishekgautam95)**  
+*Empowering enterprises with autonomous conversational intelligence.*
 
 </div>
