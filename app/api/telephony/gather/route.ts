@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { AppointmentStatus, CallRole } from "@prisma/client";
 import { dispatchAppointmentWebhook, sendSmsConfirmation } from "@/lib/notifications";
+import { recordAuditLog } from "@/lib/audit";
 
 export async function POST(request: Request) {
   const url = new URL(request.url);
@@ -79,6 +80,19 @@ export async function POST(request: Request) {
       },
     });
 
+    recordAuditLog({
+      organizationId: organization.id,
+      action: "APPOINTMENT_CREATED",
+      entityType: "Appointment",
+      entityId: createdApt.id,
+      metadata: {
+        customer: createdApt.customerName,
+        phone: callerNumber,
+        source: "Telephony Carrier",
+        callSid,
+      },
+    }).catch(() => {});
+
     dispatchAppointmentWebhook(organization.id, {
       id: createdApt.id,
       customerName: createdApt.customerName,
@@ -108,7 +122,32 @@ export async function POST(request: Request) {
     replyText = `You are very welcome! Have a fantastic day. Goodbye!`;
     shouldHangup = true;
   } else {
-    replyText = `Thank you for asking. As the front desk receptionist for ${businessName}, I can help you schedule appointments, verify insurances, or provide clinic directions.`;
+    // Knowledge Base RAG Search for live telephony callers
+    const knowledgeDocs = await db.knowledgeDocument.findMany({
+      where: { organizationId: organization.id, enabled: true },
+    });
+
+    const matchedDoc = knowledgeDocs.find((doc) => {
+      const keywords = (doc.title + " " + doc.category)
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 3);
+      return (
+        keywords.some((k) => lower.includes(k)) ||
+        (lower.includes("insurance") && doc.category.toLowerCase().includes("insurance")) ||
+        (lower.includes("park") && doc.title.toLowerCase().includes("park")) ||
+        (lower.includes("emergency") && doc.title.toLowerCase().includes("emergency")) ||
+        (lower.includes("whiten") && doc.title.toLowerCase().includes("whiten")) ||
+        (lower.includes("price") && doc.category.toLowerCase().includes("pricing")) ||
+        (lower.includes("cancel") && doc.title.toLowerCase().includes("cancel"))
+      );
+    });
+
+    if (matchedDoc) {
+      replyText = `${matchedDoc.content} Would you like to schedule a visit or ask anything else?`;
+    } else {
+      replyText = `Thank you for asking. As the front desk receptionist for ${businessName}, I can help you schedule appointments, verify insurances, or provide clinic directions.`;
+    }
   }
 
   // Update call record and log transcripts if CallRecord exists

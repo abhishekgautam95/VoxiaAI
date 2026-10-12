@@ -16,7 +16,59 @@ import {
   Sliders,
   Menu,
   Mic,
+  Calendar,
+  CheckCheck,
+  Sparkles,
 } from "lucide-react";
+
+export interface HeaderNotification {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+  type: "appointment" | "call" | "security";
+  href: string;
+  unread: boolean;
+}
+
+const DEFAULT_NOTIFICATIONS: HeaderNotification[] = [
+  {
+    id: "notif-1",
+    title: "New Appointment Booked",
+    description: "Marcus Brody confirmed for Routine Cleaning tomorrow at 10:30 AM",
+    time: "10 mins ago",
+    type: "appointment",
+    href: "/dashboard/appointments",
+    unread: true,
+  },
+  {
+    id: "notif-2",
+    title: "Emergency Toothache Handled",
+    description: "Eleanor Vance reserved urgent slot with Dr. Sarah Smith",
+    time: "45 mins ago",
+    type: "appointment",
+    href: "/dashboard/appointments",
+    unread: true,
+  },
+  {
+    id: "notif-3",
+    title: "Live Call Transcript Analyzed",
+    description: "Delta Dental insurance verification query resolved with 100% positive sentiment",
+    time: "2 hours ago",
+    type: "call",
+    href: "/dashboard/calls",
+    unread: false,
+  },
+  {
+    id: "notif-4",
+    title: "HIPAA Audit Trail Synced",
+    description: "Immutable compliance checkpoint recorded with SHA-256 integrity hash",
+    time: "4 hours ago",
+    type: "security",
+    href: "/dashboard/settings",
+    unread: false,
+  },
+];
 
 interface Organization {
   id: string;
@@ -68,7 +120,10 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   // Notification state
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const [notifications, setNotifications] = useState<HeaderNotification[]>(DEFAULT_NOTIFICATIONS);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsDropdownRef = useRef<HTMLDivElement>(null);
+  const hasUnread = notifications.some((n) => n.unread);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -111,6 +166,12 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         !profileDropdownRef.current.contains(event.target as Node)
       ) {
         setIsProfileOpen(false);
+      }
+      if (
+        notificationsDropdownRef.current &&
+        !notificationsDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsNotificationsOpen(false);
       }
     }
 
@@ -279,18 +340,108 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           <span>Test Call</span>
         </button>
 
-        {/* Notifications Icon */}
-        <button
-          type="button"
-          onClick={() => setHasUnreadNotifications(false)}
-          className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
-          aria-label="View notifications"
-        >
-          <Bell className="h-4 w-4" />
-          {hasUnreadNotifications && (
-            <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-cyan-400 ring-2 ring-zinc-950" />
+        {/* Notifications Icon & Dropdown */}
+        <div className="relative" ref={notificationsDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsNotificationsOpen((prev) => !prev)}
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+            aria-label="View notifications"
+            aria-expanded={isNotificationsOpen}
+          >
+            <Bell className="h-4 w-4" />
+            {hasUnread && (
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-cyan-400 ring-2 ring-zinc-950" />
+            )}
+          </button>
+
+          {isNotificationsOpen && (
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-2xl border border-zinc-800 bg-zinc-950/95 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100 z-50">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5 px-1">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-cyan-400" />
+                  <span className="text-xs font-bold text-white">Live Clinic Activity</span>
+                </div>
+                {hasUnread && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
+                    }
+                    className="flex items-center gap-1 text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                  >
+                    <CheckCheck className="h-3 w-3" />
+                    <span>Mark all read</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-2 space-y-1.5 max-h-80 overflow-y-auto">
+                {notifications.map((notif) => (
+                  <a
+                    key={notif.id}
+                    href={notif.href}
+                    onClick={() => {
+                      setNotifications((prev) =>
+                        prev.map((n) => (n.id === notif.id ? { ...n, unread: false } : n))
+                      );
+                      setIsNotificationsOpen(false);
+                    }}
+                    className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors ${
+                      notif.unread
+                        ? "bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800"
+                        : "hover:bg-zinc-900/50"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs ${
+                        notif.type === "appointment"
+                          ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                          : notif.type === "call"
+                          ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
+                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      }`}
+                    >
+                      {notif.type === "appointment" ? (
+                        <Calendar className="h-4 w-4" />
+                      ) : notif.type === "call" ? (
+                        <PhoneCall className="h-4 w-4" />
+                      ) : (
+                        <Shield className="h-4 w-4" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="text-xs font-semibold text-zinc-100 truncate">
+                          {notif.title}
+                        </p>
+                        <span className="text-[10px] text-zinc-500 shrink-0">{notif.time}</span>
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                        {notif.description}
+                      </p>
+                    </div>
+
+                    {notif.unread && (
+                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
+                    )}
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-2.5 border-t border-zinc-800/80 pt-2 text-center">
+                <a
+                  href="/dashboard/calls"
+                  onClick={() => setIsNotificationsOpen(false)}
+                  className="text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  View All Call Records & Transcripts &rarr;
+                </a>
+              </div>
+            </div>
           )}
-        </button>
+        </div>
 
         {/* User Profile Avatar & Dropdown */}
         <div className="relative" ref={profileDropdownRef}>

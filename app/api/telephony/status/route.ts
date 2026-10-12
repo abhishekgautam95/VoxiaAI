@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { recordAuditLog } from "@/lib/audit";
 
 export async function POST(request: Request) {
   let callSid = "";
@@ -27,6 +28,8 @@ export async function POST(request: Request) {
     const secs = duration % 60;
     const formatted = `${mins}m ${secs}s`;
 
+    const existingRecord = await db.callRecord.findUnique({ where: { callId: callSid } });
+
     await db.callRecord.updateMany({
       where: { callId: callSid },
       data: {
@@ -36,6 +39,22 @@ export async function POST(request: Request) {
         audioUrl: recordingUrl || undefined,
       },
     });
+
+    if (existingRecord) {
+      recordAuditLog({
+        organizationId: existingRecord.organizationId,
+        action: "CALL_RECORDED",
+        entityType: "CallRecord",
+        entityId: existingRecord.id,
+        metadata: {
+          callSid,
+          duration,
+          durationFormatted: formatted,
+          callerNumber: existingRecord.callerNumber,
+          hasRecording: !!recordingUrl,
+        },
+      }).catch(() => {});
+    }
   }
 
   return Response.json({ received: true });

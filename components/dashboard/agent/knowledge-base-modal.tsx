@@ -55,7 +55,6 @@ export function KnowledgeBaseModal({
   const [newContent, setNewContent] = useState("");
 
   const loadDocuments = useCallback(() => {
-    setIsLoading(true);
     fetch("/api/knowledge-base")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -69,10 +68,24 @@ export function KnowledgeBaseModal({
   }, [onUpdateCount]);
 
   useEffect(() => {
-    if (isOpen) {
-      loadDocuments();
-    }
-  }, [isOpen, loadDocuments]);
+    if (!isOpen) return;
+    let active = true;
+    fetch("/api/knowledge-base")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.documents)) {
+          setDocuments(data.documents);
+          if (onUpdateCount) onUpdateCount(data.documents.length);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isOpen, onUpdateCount]);
 
   const handleCreateDocument = async (e: React.FormEvent) => {
     e.preventDefault();

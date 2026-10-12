@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { AppointmentStatus } from "@prisma/client";
 import { dispatchAppointmentWebhook, sendSmsConfirmation } from "@/lib/notifications";
+import { recordAuditLog } from "@/lib/audit";
 
 const simulateSchema = z.object({
   callerText: z.string().trim().min(1),
@@ -137,6 +138,21 @@ Instructions:
       });
 
       bookedAppointment = createdApt;
+
+      recordAuditLog({
+        organizationId: session.organizationId,
+        actorUserId: session.userId,
+        action: "APPOINTMENT_CREATED",
+        entityType: "Appointment",
+        entityId: createdApt.id,
+        metadata: {
+          customer: createdApt.customerName,
+          date: createdApt.date,
+          time: createdApt.time,
+          service: createdApt.service,
+          source: "Voice Simulator",
+        },
+      }).catch(() => {});
 
       dispatchAppointmentWebhook(session.organizationId, {
         id: createdApt.id,

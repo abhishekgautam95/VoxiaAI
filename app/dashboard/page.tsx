@@ -187,13 +187,47 @@ export default function DashboardOverviewPage() {
   const [calls, setCalls] = useState<RecentCall[]>(recentCalls);
   const [appointments, setAppointments] = useState<UpcomingAppointment[]>(upcomingAppointments);
   const [dynamicMetrics, setDynamicMetrics] = useState<MetricCard[]>(metricCards);
+  const [analyticsSummary, setAnalyticsSummary] = useState<{
+    netLaborSavedFormatted: string;
+    revenueYieldFormatted: string;
+    deflectionRatePercent: number;
+    hoursSavedFormatted: string;
+  } | null>(null);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/calls").then((r) => (r.ok ? r.json() : null)),
       fetch("/api/appointments").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/analytics").then((r) => (r.ok ? r.json() : null)),
     ])
-      .then(([callsData, apptData]) => {
+      .then(([callsData, apptData, analyticsData]) => {
+        if (analyticsData?.summary) {
+          setAnalyticsSummary({
+            netLaborSavedFormatted: analyticsData.summary.netLaborSavedFormatted,
+            revenueYieldFormatted: analyticsData.summary.revenueYieldFormatted,
+            deflectionRatePercent: analyticsData.summary.deflectionRatePercent,
+            hoursSavedFormatted: analyticsData.summary.hoursSavedFormatted,
+          });
+
+          setDynamicMetrics((prev: MetricCard[]) =>
+            prev.map((card: MetricCard) => {
+              if (card.id === "total-calls") {
+                return { ...card, value: analyticsData.summary.totalCalls.toLocaleString() };
+              }
+              if (card.id === "total-minutes") {
+                return { ...card, value: `${analyticsData.summary.totalDurationMinutes} mins` };
+              }
+              if (card.id === "appointments-booked") {
+                return { ...card, value: `${analyticsData.summary.appointmentsBooked}` };
+              }
+              if (card.id === "conversion-rate") {
+                return { ...card, value: `${analyticsData.summary.bookedRatePercent}%` };
+              }
+              return card;
+            })
+          );
+        }
+
         if (Array.isArray(callsData?.calls) && callsData.calls.length > 0) {
           const mappedCalls: RecentCall[] = callsData.calls.slice(0, 5).map((c: DbCallSummary) => ({
             id: c.id,
@@ -211,31 +245,6 @@ export default function DashboardOverviewPage() {
             }),
           }));
           setCalls(mappedCalls);
-
-          const totalMins = Math.round(
-            callsData.calls.reduce(
-              (acc: number, cur: DbCallSummary) => acc + (cur.durationSeconds || 0),
-              0
-            ) / 60
-          );
-          const bookedCount = callsData.calls.filter(
-            (c: DbCallSummary) => c.status === "APPOINTMENT_BOOKED"
-          ).length;
-
-          setDynamicMetrics((prev: MetricCard[]) =>
-            prev.map((card: MetricCard) => {
-              if (card.id === "total-calls") {
-                return { ...card, value: `${1280 + callsData.calls.length}` };
-              }
-              if (card.id === "total-minutes") {
-                return { ...card, value: `${340 + totalMins} mins` };
-              }
-              if (card.id === "appointments-booked") {
-                return { ...card, value: `${85 + bookedCount}` };
-              }
-              return card;
-            })
-          );
         }
 
         if (Array.isArray(apptData?.appointments) && apptData.appointments.length > 0) {
@@ -301,6 +310,36 @@ export default function DashboardOverviewPage() {
           </Link>
         </div>
       </div>
+
+      {/* Financial Yield & Staff Preserved Hours Banner */}
+      {analyticsSummary && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-cyan-950/40 via-zinc-900/40 to-indigo-950/40 p-4 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white">
+                Autonomous Front-Desk Operational Yield
+              </p>
+              <p className="text-[11px] text-zinc-400">
+                AI Receptionist has preserved <span className="text-cyan-300 font-medium">{analyticsSummary.hoursSavedFormatted}</span> of staff hours with a <span className="text-emerald-400 font-medium">{analyticsSummary.deflectionRatePercent}%</span> deflection rate.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 self-end sm:self-auto">
+            <div className="text-right">
+              <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Net Labor Saved</span>
+              <span className="text-sm font-bold text-emerald-400">{analyticsSummary.netLaborSavedFormatted}</span>
+            </div>
+            <div className="h-6 w-px bg-zinc-800" />
+            <div className="text-right">
+              <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Pipeline Yield</span>
+              <span className="text-sm font-bold text-cyan-400">{analyticsSummary.revenueYieldFormatted}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Top Metric Cards (4-grid) ───────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

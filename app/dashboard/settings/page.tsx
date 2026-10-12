@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Phone, Key, Calendar, Bot, CheckCircle2, RefreshCw } from "lucide-react";
+import { Phone, Key, Calendar, Bot, CheckCircle2, RefreshCw, ShieldCheck } from "lucide-react";
+import { AuditLogsView } from "@/components/dashboard/settings/audit-logs-view";
 
 export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState<"integrations" | "audit">("integrations");
   const [twilioSid, setTwilioSid] = useState("AC993817112048f0");
   const [webhookUrl, setWebhookUrl] = useState("https://api.voxia.ai/webhooks/calls/v1");
   const [elevenLabsKey, setElevenLabsKey] = useState("••••••••••••••••••••••••");
@@ -78,7 +80,38 @@ export default function SettingsPage() {
         )}
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      {/* Settings Navigation Tabs */}
+      <div className="flex border-b border-zinc-800">
+        <button
+          type="button"
+          onClick={() => setActiveTab("integrations")}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors ${
+            activeTab === "integrations"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <Phone className="h-4 w-4" />
+          <span>Telephony & Integrations</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("audit")}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors ${
+            activeTab === "audit"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          <span>Security & Compliance Audit Trail</span>
+        </button>
+      </div>
+
+      {activeTab === "audit" ? (
+        <AuditLogsView />
+      ) : (
+        <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Telephony SIP Configuration */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-4">
@@ -222,6 +255,7 @@ export default function SettingsPage() {
           </button>
         </div>
       </form>
+      )}
     </div>
   );
 }

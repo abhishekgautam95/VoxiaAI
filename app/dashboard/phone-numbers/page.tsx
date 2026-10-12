@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useCallback } from "react";
-import { Phone, Plus } from "lucide-react";
+import { Phone, Plus, Copy, Check, Trash2, Power } from "lucide-react";
 
 interface PhoneNumberItem {
   id: string;
@@ -20,6 +18,8 @@ export default function PhoneNumbersPage() {
   const [showModal, setShowModal] = useState(false);
   const [areaCode, setAreaCode] = useState("415");
   const [label, setLabel] = useState("Main Clinic Inbound");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadNumbers = useCallback(() => {
     fetch("/api/phone-numbers")
@@ -38,6 +38,48 @@ export default function PhoneNumbersPage() {
   useEffect(() => {
     loadNumbers();
   }, [loadNumbers]);
+
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    try {
+      const res = await fetch(`/api/phone-numbers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (res.ok) {
+        setNumbers((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, status: nextStatus } : n))
+        );
+      }
+    } catch {
+      setActionError("Failed to update status");
+      setTimeout(() => setActionError(null), 3000);
+    }
+  };
+
+  const handleDeleteNumber = async (id: string, numberStr: string) => {
+    if (!confirm(`Are you sure you want to release ${numberStr}? Incoming calls to this line will no longer connect.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/phone-numbers/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setNumbers((prev) => prev.filter((n) => n.id !== id));
+      }
+    } catch {
+      setActionError("Failed to release number");
+      setTimeout(() => setActionError(null), 3000);
+    }
+  };
 
   const handleProvision = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,37 +139,78 @@ export default function PhoneNumbersPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {numbers.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 transition-all hover:border-zinc-700"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-mono text-sm">
-                    <Phone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm font-semibold text-zinc-100">{item.number}</p>
-                      <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">
-                        {item.provider}
-                      </span>
+          {numbers.map((item) => {
+            const isActive = item.status === "ACTIVE";
+            return (
+              <div
+                key={item.id}
+                className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 transition-all hover:border-zinc-700"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg border font-mono text-sm ${
+                        isActive
+                          ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
+                          : "bg-zinc-800/40 border-zinc-700/40 text-zinc-500"
+                      }`}
+                    >
+                      <Phone className="h-5 w-5" />
                     </div>
-                    <p className="text-xs text-zinc-400">
-                      {item.label} • {item.cityState} • Assigned to <span className="text-cyan-300 font-medium">{item.assignedAgent}</span>
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-sm font-semibold text-zinc-100">{item.number}</p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(item.id, item.number)}
+                          className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
+                          title="Copy phone number"
+                        >
+                          {copiedId === item.id ? (
+                            <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                          {item.provider}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-400">
+                        {item.label} • {item.cityState} • Assigned to{" "}
+                        <span className="text-cyan-300 font-medium">{item.assignedAgent}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="rounded bg-emerald-950/80 border border-emerald-800/50 px-2.5 py-1 text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Routing Live (SIP Trunk Active)</span>
-                  </span>
+
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(item.id, item.status)}
+                      className={`rounded px-2.5 py-1 text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
+                        isActive
+                          ? "bg-emerald-950/80 border-emerald-800/50 text-emerald-400 hover:bg-emerald-900/60"
+                          : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-200"
+                      }`}
+                      title={isActive ? "Click to pause answering" : "Click to activate answering"}
+                    >
+                      <Power className={`h-3 w-3 ${isActive ? "text-emerald-400" : "text-zinc-500"}`} />
+                      <span>{isActive ? "Routing Live" : "Line Paused"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteNumber(item.id, item.number)}
+                      className="rounded p-1.5 text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-colors"
+                      title="Release line"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
