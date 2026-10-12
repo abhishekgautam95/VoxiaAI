@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Phone, Plus, Copy, Check, Trash2, Power } from "lucide-react";
 
@@ -121,6 +123,12 @@ export default function PhoneNumbersPage() {
           <Plus className="h-4 w-4" /> Provision New Number
         </button>
       </div>
+
+      {actionError && (
+        <div className="rounded-lg border border-rose-500/30 bg-rose-950/60 px-3.5 py-2 text-xs text-rose-300">
+          {actionError}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
