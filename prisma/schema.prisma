@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  OPERATOR
+  ANALYST
+}
+
+enum AuditAction {
+  AUTHENTICATED
+  SIGNED_OUT
+  AGENT_CONFIG_UPDATED
+  APPOINTMENT_CREATED
+  APPOINTMENT_UPDATED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_RESCHEDULED
+  CALL_RECORDED
+  INTEGRATION_UPDATED
+  PHONE_PROVISIONED
+  KNOWLEDGE_BASE_UPDATED
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  PENDING
+}
+
+enum CallStatus {
+  COMPLETED
+  MISSED
+  APPOINTMENT_BOOKED
+}
+
+enum CallRole {
+  AI
+  USER
+}
+
+enum PhoneNumberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum IntegrationProvider {
+  TWILIO
+  TELNYX
+  GOOGLE_CALENDAR
+  CAL_COM
+  ELEVENLABS
+}
+
+model Organization {
+  id           String              @id @default(cuid())
+  name         String
+  slug         String              @unique
+  timezone     String              @default("America/Los_Angeles")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  memberships  Membership[]
+  sessions     Session[]
+  agentConfig  AgentConfig?
+  auditLogs    AuditLog[]
+  appointments Appointment[]
+  callRecords  CallRecord[]
+  phoneNumbers PhoneNumber[]
+  integrations IntegrationConfig[]
+  knowledgeDocs KnowledgeDocument[]
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  memberships  Membership[]
+  sessions     Session[]
+  auditLogs    AuditLog[]
+}
+
+model Membership {
+  id             String         @id @default(cuid())
+  organizationId String
+  userId         String
+  role           MembershipRole @default(OPERATOR)
+  createdAt      DateTime       @default(now())
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model Session {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  userId         String
+  organizationId String
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([expiresAt])
+}
+
+model AgentConfig {
+  id              String       @id @default(cuid())
+  organizationId  String       @unique
+  displayName     String       @default("Sarah (AI Receptionist)")
+  businessName    String       @default("Apex Health & Dental")
+  businessType    String       @default("Dental Clinic")
+  businessAddress String       @default("742 Evergreen Terrace, Suite 200, San Francisco, CA")
+  officeHours     String       @default("Mon-Fri 8:00 AM - 6:00 PM, Sat 9:00 AM - 2:00 PM")
+  phoneNumber     String       @default("+1 (415) 800-4291")
+  systemPrompt    String       @default("")
+  voiceId         String?      @default("21m00Tcm4TlvDq8ikWAM")
+  voiceName       String?      @default("Rachel (Warm & Natural)")
+  primaryLanguage String       @default("en-US")
+  latencyMode     String       @default("ultra_low")
+  tone            String       @default("warm")
+  interruptible   Boolean      @default(true)
+  configuration   Json         @default("{}")
+  deployedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id             String            @id @default(cuid())
+  organizationId String
+  customerName   String
+  phoneNumber    String
+  email          String?
+  service        String            @default("Dental Cleaning & Exam")
+  provider       String?           @default("Dr. Sarah Smith")
+  date           String // YYYY-MM-DD
+  time           String // e.g. "10:30 AM"
+  status         AppointmentStatus @default(CONFIRMED)
+  notes          String?
+  bookedBy       String            @default("AI Receptionist")
+  callRecordId   String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  callRecord     CallRecord?       @relation(fields: [callRecordId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, date])
+  @@index([organizationId, status])
+}
+
+model CallRecord {
+  id                 String           @id @default(cuid())
+  callId             String           @unique
+  organizationId     String
+  callerNumber       String
+  callerName         String?
+  durationSeconds    Int              @default(0)
+  durationFormatted  String           @default("0m 0s")
+  status             CallStatus       @default(COMPLETED)
+  aiSummary          String           @default("")
+  keyTakeaways       Json             @default("[]")
+  sentiment          String           @default("Positive")
+  audioUrl           String?
+  audioDurationSec   Int              @default(0)
+  startedAt          DateTime         @default(now())
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transcripts        CallTranscript[]
+  appointments       Appointment[]
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, status])
+}
+
+model CallTranscript {
+  id           String     @id @default(cuid())
+  callRecordId String
+  role         CallRole
+  text         String
+  timestamp    String // e.g. "0:05"
+  sequence     Int        @default(0)
+  createdAt    DateTime   @default(now())
+  callRecord   CallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+
+  @@index([callRecordId, sequence])
+}
+
+model PhoneNumber {
+  id             String            @id @default(cuid())
+  organizationId String
+  number         String
+  label          String            @default("Main Clinic Line")
+  cityState      String            @default("San Francisco, CA")
+  assignedAgent  String            @default("Sarah (AI Receptionist)")
+  status         PhoneNumberStatus @default(ACTIVE)
+  provider       String            @default("Twilio")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, number])
+}
+
+model IntegrationConfig {
+  id             String              @id @default(cuid())
+  organizationId String
+  provider       IntegrationProvider
+  enabled        Boolean             @default(true)
+  config         Json                @default("{}")
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, provider])
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  actorUserId    String?
+  action         AuditAction
+  entityType     String
+  entityId       String?
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actorUser      User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([actorUserId])
+}
+
+model KnowledgeDocument {
+  id             String       @id @default(cuid())
+  organizationId String
+  title          String
+  category       String       @default("General FAQ")
+  content        String       @db.Text
+  sourceType     String       @default("FAQ")
+  enabled        Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, category])
+}

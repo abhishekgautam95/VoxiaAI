@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   ChevronDown,
@@ -50,7 +51,11 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleMobileMenu }: HeaderProps) {
-  // Organization state
+  const router = useRouter();
+
+  // Session & Org state
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
+  const [currentOrg, setCurrentOrg] = useState<{ id: string; name: string; slug: string } | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<Organization>(mockOrganizations[0]);
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
   const orgDropdownRef = useRef<HTMLDivElement>(null);
@@ -64,6 +69,33 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
 
   // Notification state
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user && data?.organization) {
+          setCurrentUser(data.user);
+          setCurrentOrg(data.organization);
+          setSelectedOrg({
+            id: data.organization.id,
+            name: data.organization.name,
+            plan: "Enterprise",
+            phone: "+1 (415) 800-4291",
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -271,7 +303,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           >
             {/* Avatar Pill */}
             <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 text-xs font-semibold text-white shadow-sm ring-1 ring-zinc-700">
-              AR
+              {currentUser?.name ? currentUser.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() : "OW"}
               {/* Online indicator */}
               <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-zinc-950 bg-emerald-500" />
             </div>
@@ -288,12 +320,12 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
             <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-zinc-800 bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100">
               {/* Profile Card Header */}
               <div className="border-b border-zinc-800/80 px-3 py-2.5">
-                <p className="text-xs font-semibold text-zinc-100">Alex Rivera</p>
+                <p className="text-xs font-semibold text-zinc-100">{currentUser?.name || "Workspace Owner"}</p>
                 <p className="truncate text-[11px] text-zinc-400">
-                  alex@apexhealth.io
+                  {currentUser?.email || "demo.owner@voxia.local"}
                 </p>
                 <div className="mt-1.5 inline-flex items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-cyan-300">
-                  <Shield className="h-2.5 w-2.5" /> Workspace Owner
+                  <Shield className="h-2.5 w-2.5" /> {currentOrg?.name || "Apex Health & Dental"}
                 </div>
               </div>
 
@@ -328,6 +360,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
               <div className="border-t border-zinc-800/80 pt-1">
                 <button
                   type="button"
+                  onClick={handleSignOut}
                   className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-950/30 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" />

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   CalendarCheck,
   BookOpen,
@@ -10,6 +10,7 @@ import {
   Link2,
 } from "lucide-react";
 import { AgentConfig } from "./types";
+import { KnowledgeBaseModal } from "./knowledge-base-modal";
 
 interface ToolsTabProps {
   config: AgentConfig;
@@ -17,6 +18,23 @@ interface ToolsTabProps {
 }
 
 export function ToolsTab({ config, onChange }: ToolsTabProps) {
+  const [isKbModalOpen, setIsKbModalOpen] = useState(false);
+  const [kbDocCount, setKbDocCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/knowledge-base")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.documents)) {
+          setKbDocCount(data.documents.length);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <div className="space-y-6">
       {/* Function Calling & Integrations */}
@@ -90,9 +108,22 @@ export function ToolsTab({ config, onChange }: ToolsTabProps) {
                 <p className="mt-0.5 text-xs text-zinc-400 max-w-md">
                   Gives the agent semantic search over insurance policies, service pricing sheets, and practitioner bios.
                 </p>
-                <div className="mt-2 flex items-center gap-2 text-[11px] text-cyan-300">
-                  <Link2 className="h-3 w-3" />
-                  <span>14 Documents Indexed (PDFs, FAQ Guidelines)</span>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-cyan-300">
+                  <div className="flex items-center gap-1.5">
+                    <Link2 className="h-3 w-3" />
+                    <span>
+                      {kbDocCount !== null
+                        ? `${kbDocCount} Documents Indexed`
+                        : "Indexed Clinic Guidelines & FAQs"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsKbModalOpen(true)}
+                    className="font-medium text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition-colors cursor-pointer"
+                  >
+                    Manage Knowledge Base →
+                  </button>
                 </div>
               </div>
             </div>
@@ -193,6 +224,12 @@ export function ToolsTab({ config, onChange }: ToolsTabProps) {
           </div>
         </div>
       </div>
+
+      <KnowledgeBaseModal
+        isOpen={isKbModalOpen}
+        onClose={() => setIsKbModalOpen(false)}
+        onUpdateCount={(count) => setKbDocCount(count)}
+      />
     </div>
   );
 }

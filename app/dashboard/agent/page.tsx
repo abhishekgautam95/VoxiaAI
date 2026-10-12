@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Building2,
   Bot,
@@ -29,7 +29,34 @@ export default function AgentConfigPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("business");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFloatingCallOpen, setIsFloatingCallOpen] = useState(false);
+
+  // Load config from database on mount
+  useEffect(() => {
+    fetch("/api/agent")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.agent) {
+          const dbAgent = data.agent;
+          const merged: AgentConfig = {
+            ...DEFAULT_AGENT_CONFIG,
+            businessName: dbAgent.businessName || DEFAULT_AGENT_CONFIG.businessName,
+            businessAddress: dbAgent.businessAddress || DEFAULT_AGENT_CONFIG.businessAddress,
+            officeHours: dbAgent.officeHours || DEFAULT_AGENT_CONFIG.officeHours,
+            businessPhone: dbAgent.phoneNumber || DEFAULT_AGENT_CONFIG.businessPhone,
+            agentName: dbAgent.displayName?.split(" ")[0] || DEFAULT_AGENT_CONFIG.agentName,
+            systemPrompt: dbAgent.systemPrompt || DEFAULT_AGENT_CONFIG.systemPrompt,
+            selectedVoiceId: dbAgent.voiceId || DEFAULT_AGENT_CONFIG.selectedVoiceId,
+            primaryLanguage: (dbAgent.primaryLanguage as AgentConfig["primaryLanguage"]) || DEFAULT_AGENT_CONFIG.primaryLanguage,
+            latencyMode: (dbAgent.latencyMode as AgentConfig["latencyMode"]) || DEFAULT_AGENT_CONFIG.latencyMode,
+          };
+          setConfig(merged);
+          setSavedConfig(merged);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Check if there are unsaved changes
   const hasUnsavedChanges = JSON.stringify(config) !== JSON.stringify(savedConfig);
@@ -38,14 +65,43 @@ export default function AgentConfigPage() {
     setConfig((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch("/api/agent", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: `${config.agentName} (AI Receptionist)`,
+          businessName: config.businessName,
+          businessType: config.businessCategory,
+          businessAddress: config.businessAddress,
+          officeHours: config.officeHours,
+          phoneNumber: config.businessPhone,
+          systemPrompt: config.systemPrompt,
+          voiceId: config.selectedVoiceId,
+          primaryLanguage: config.primaryLanguage,
+          latencyMode: config.latencyMode,
+          tone: config.conversationTone,
+          interruptible: config.interruptionSensitivity !== "low",
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to deploy agent configuration");
+      }
+
       setSavedConfig(config);
-      setIsSaving(false);
       setSaveSuccessMessage(true);
-      setTimeout(() => setSaveSuccessMessage(false), 3500);
-    }, 600);
+      setTimeout(() => setSaveSuccessMessage(false), 4000);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Error saving configuration");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -108,6 +164,20 @@ export default function AgentConfigPage() {
           </button>
         </div>
       </div>
+
+      {/* Error Message Banner */}
+      {errorMessage && (
+        <div className="flex items-center justify-between rounded-xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-xs text-rose-300 backdrop-blur-md">
+          <span>{errorMessage}</span>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="text-rose-400 hover:text-white font-medium"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Save Success Banner */}
       {saveSuccessMessage && (

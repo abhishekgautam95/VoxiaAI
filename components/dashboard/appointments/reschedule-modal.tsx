@@ -11,6 +11,15 @@ interface RescheduleModalProps {
   onReschedule: (aptId: string, newDate: string, newTime: string, reason?: string) => void;
 }
 
+interface AvailabilitySlot {
+  time: string;
+  available: boolean;
+  bookedInfo?: {
+    appointmentId: string;
+    service?: string;
+  } | null;
+}
+
 function RescheduleDialogContent({
   appointment,
   onClose,
@@ -23,6 +32,37 @@ function RescheduleDialogContent({
   const [newDate, setNewDate] = useState(appointment.date);
   const [newTime, setNewTime] = useState(appointment.time);
   const [reason, setReason] = useState("");
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  React.useEffect(() => {
+    if (!newDate) return;
+    let active = true;
+    const fetchSlots = () => {
+      fetch(`/api/calendar/availability?date=${newDate}&excludeId=${appointment.id}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!active) return;
+          if (data?.slots && Array.isArray(data.slots)) {
+            setSlots(data.slots);
+            setNewTime((prev) => {
+              const match = data.slots.find((s: AvailabilitySlot) => s.time === prev);
+              if (match && match.available) return prev;
+              const firstOpen = data.slots.find((s: AvailabilitySlot) => s.available);
+              return firstOpen ? firstOpen.time : prev;
+            });
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (active) setLoadingSlots(false);
+        });
+    };
+    fetchSlots();
+    return () => {
+      active = false;
+    };
+  }, [newDate, appointment.id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,33 +128,56 @@ function RescheduleDialogContent({
         </div>
 
         <div>
-          <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 text-cyan-400" /> Select New Time Slot
+          <label className="text-xs font-medium text-zinc-300 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-cyan-400" /> Select New Time Slot
+            </span>
+            <span className="text-[10px] text-zinc-400">
+              {loadingSlots ? (
+                "Checking..."
+              ) : (
+                <span className="text-emerald-400 font-mono">
+                  {slots.filter((s) => s.available).length} open
+                </span>
+              )}
+            </span>
           </label>
           <select
             value={newTime}
             onChange={(e) => setNewTime(e.target.value)}
             className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-white focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 cursor-pointer"
           >
-            {[
-              "08:30 AM",
-              "09:00 AM",
-              "09:30 AM",
-              "10:00 AM",
-              "10:30 AM",
-              "11:15 AM",
-              "01:00 PM",
-              "01:30 PM",
-              "02:15 PM",
-              "03:00 PM",
-              "03:30 PM",
-              "04:30 PM",
-              "05:00 PM",
-            ].map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
+            {slots.length > 0
+              ? slots.map((s) => (
+                  <option
+                    key={s.time}
+                    value={s.time}
+                    disabled={!s.available}
+                    className={!s.available ? "text-zinc-500 bg-zinc-950" : ""}
+                  >
+                    {s.time} {!s.available ? " (Booked)" : " ✓ Available"}
+                  </option>
+                ))
+              : [
+                  "9:00 AM",
+                  "9:30 AM",
+                  "10:00 AM",
+                  "10:30 AM",
+                  "11:00 AM",
+                  "11:30 AM",
+                  "1:00 PM",
+                  "1:30 PM",
+                  "2:00 PM",
+                  "2:30 PM",
+                  "3:00 PM",
+                  "3:30 PM",
+                  "4:00 PM",
+                  "4:30 PM",
+                ].map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
           </select>
         </div>
 

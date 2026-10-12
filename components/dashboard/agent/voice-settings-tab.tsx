@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Mic,
   Play,
@@ -16,9 +16,9 @@ interface VoiceSettingsTabProps {
   config: AgentConfig;
   onChange: (updates: Partial<AgentConfig>) => void;
 }
-
 export function VoiceSettingsTab({ config, onChange }: VoiceSettingsTabProps) {
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   // Stop speech when component unmounts
   useEffect(() => {
@@ -26,19 +26,13 @@ export function VoiceSettingsTab({ config, onChange }: VoiceSettingsTabProps) {
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
     };
   }, []);
 
-  // Play preview sample audio using SpeechSynthesis
-  const handlePlayVoicePreview = (voice: VoiceOption) => {
-    if (playingVoiceId === voice.id) {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-      setPlayingVoiceId(null);
-      return;
-    }
-
+  const fallbackSpeechSynthesis = (voice: VoiceOption) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       setPlayingVoiceId(voice.id);
       setTimeout(() => setPlayingVoiceId(null), 2500);
@@ -61,6 +55,57 @@ export function VoiceSettingsTab({ config, onChange }: VoiceSettingsTabProps) {
     utterance.onerror = () => setPlayingVoiceId(null);
 
     window.speechSynthesis.speak(utterance);
+  };
+
+  // Play preview sample audio using ElevenLabs or SpeechSynthesis fallback
+  const handlePlayVoicePreview = async (voice: VoiceOption) => {
+    if (playingVoiceId === voice.id) {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
+      setPlayingVoiceId(null);
+      return;
+    }
+
+    setPlayingVoiceId(voice.id);
+
+    try {
+      const res = await fetch("/api/voice/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: voice.previewSampleText,
+          voiceId: voice.id,
+          stability: config.voiceStability,
+          similarity: config.clarityBoost,
+        }),
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      if (res.ok && contentType.includes("audio/mpeg")) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioPlayerRef.current = audio;
+        audio.onended = () => {
+          setPlayingVoiceId(null);
+          URL.revokeObjectURL(url);
+        };
+        audio.onerror = () => {
+          setPlayingVoiceId(null);
+          URL.revokeObjectURL(url);
+        };
+        await audio.play();
+        return;
+      }
+    } catch {
+      // Ignore network errors and proceed to fallback
+    }
+
+    fallbackSpeechSynthesis(voice);
   };
 
   const currentVoice =

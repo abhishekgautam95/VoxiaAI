@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -75,6 +75,26 @@ interface SidebarProps {
 
 export function Sidebar({ onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
+  const [counts, setCounts] = useState<{ calls: number; appointments: number }>({
+    calls: 4,
+    appointments: 6,
+  });
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/calls").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/appointments").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([callsData, apptsData]) => {
+        setCounts({
+          calls: Array.isArray(callsData?.calls) ? callsData.calls.length : 4,
+          appointments: Array.isArray(apptsData?.appointments)
+            ? apptsData.appointments.length
+            : 6,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") {
@@ -167,7 +187,11 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
                             : "bg-zinc-800 text-zinc-400 border border-zinc-700/50"
                         }`}
                       >
-                        {item.badge}
+                        {item.href === "/dashboard/calls"
+                          ? `${counts.calls} calls`
+                          : item.href === "/dashboard/appointments"
+                          ? `${counts.appointments} booked`
+                          : item.badge}
                       </span>
                     )}
                   </Link>

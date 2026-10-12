@@ -86,6 +86,7 @@ export function LiveTestWidget({
 
   const transcriptScrollRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const msgCounterRef = useRef<number>(1);
 
@@ -158,8 +159,8 @@ export function LiveTestWidget({
     }
   }, []);
 
-  // Text-to-Speech simulation using window.speechSynthesis
-  const speakAgentText = useCallback(
+  // Fallback speech synthesis using browser API
+  const fallbackSpeechSynthesis = useCallback(
     (text: string) => {
       if (
         isSpeakerMuted ||
@@ -214,6 +215,62 @@ export function LiveTestWidget({
     ]
   );
 
+  // Text-to-Speech using ElevenLabs TTS API with SpeechSynthesis fallback
+  const speakAgentText = useCallback(
+    async (text: string) => {
+      if (isSpeakerMuted) return;
+
+      setIsAgentSpeaking(true);
+
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+
+      try {
+        const res = await fetch("/api/voice/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text,
+            voiceId: activeVoice.id,
+            stability: config.voiceStability,
+            similarity: config.clarityBoost,
+          }),
+        });
+
+        const contentType = res.headers.get("content-type") || "";
+        if (res.ok && contentType.includes("audio/mpeg")) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          activeAudioRef.current = audio;
+          audio.onended = () => {
+            setIsAgentSpeaking(false);
+            URL.revokeObjectURL(url);
+          };
+          audio.onerror = () => {
+            setIsAgentSpeaking(false);
+            URL.revokeObjectURL(url);
+          };
+          await audio.play();
+          return;
+        }
+      } catch {
+        // Fall back to Web Speech Synthesis
+      }
+
+      fallbackSpeechSynthesis(text);
+    },
+    [
+      activeVoice.id,
+      config.voiceStability,
+      config.clarityBoost,
+      fallbackSpeechSynthesis,
+      isSpeakerMuted,
+    ]
+  );
+
   // Start Call Handler
   const handleStartCall = () => {
     setCallState("connecting");
@@ -256,6 +313,10 @@ export function LiveTestWidget({
 
   // End Call Handler
   const handleEndCall = () => {
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
+    }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -269,6 +330,43 @@ export function LiveTestWidget({
     setIsListeningMic(false);
     setIsAgentSpeaking(false);
     setCallState("ended");
+
+    // Automatically record completed call and transcripts in database
+    if (transcript.length > 1) {
+      const isBooked = transcript.some(
+        (t) =>
+          t.text.toLowerCase().includes("reserved") ||
+          t.text.toLowerCase().includes("booked")
+      );
+      fetch("/api/calls", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          callerNumber: "+1 (415) 329-8812",
+          callerName: "Web Simulator Caller",
+          durationSeconds: callDuration,
+          durationFormatted: `${Math.floor(callDuration / 60)}m ${callDuration % 60}s`,
+          status: isBooked ? "APPOINTMENT_BOOKED" : "COMPLETED",
+          aiSummary: `Interactive test session with ${config.agentName}. Handled ${
+            transcript.filter((t) => t.sender === "caller").length
+          } caller turns.`,
+          keyTakeaways: [
+            `Session handled autonomously by ${config.agentName}`,
+            `Verified business hours, insurance, and service parameters`,
+            isBooked
+              ? "Appointment autonomously reserved in calendar"
+              : "Inquiry resolved satisfactorily",
+          ],
+          sentiment: "Positive",
+          audioDurationSec: callDuration,
+          transcripts: transcript.map((t) => ({
+            role: t.sender === "agent" ? "AI" : "USER",
+            text: t.text,
+            timestamp: t.timestamp,
+          })),
+        }),
+      }).catch(() => {});
+    }
   };
 
   // Reset to Idle
@@ -350,7 +448,7 @@ export function LiveTestWidget({
   };
 
   // Submit caller utterance
-  const handleSendUserInput = (textToSend?: string) => {
+  const handleSendUserInput = async (textToSend?: string) => {
     const text = (textToSend || userInput).trim();
     if (!text || callState !== "connected") return;
 
@@ -365,28 +463,64 @@ export function LiveTestWidget({
       timestamp: formatTimer(callDuration),
     };
 
-    setTranscript((prev) => [...prev, userMsg]);
+    const updatedTranscript = [...transcript, userMsg];
+    setTranscript(updatedTranscript);
 
     // Simulate Agent Thinking & Latency
     const latencyDelay =
       config.latencyMode === "ultra_low"
-        ? 350
+        ? 300
         : config.latencyMode === "balanced"
-        ? 650
-        : 1100;
+        ? 550
+        : 900;
 
-    setTimeout(() => {
-      const responseText = generateAgentResponse(text);
-      const agentMsgId = `msg-${msgCounterRef.current++}-agent`;
-      const agentMsg: TranscriptMessage = {
-        id: agentMsgId,
-        sender: "agent",
-        text: responseText,
-        timestamp: formatTimer(callDuration + 1),
-      };
-      setTranscript((prev) => [...prev, agentMsg]);
-      speakAgentText(responseText);
-    }, latencyDelay);
+    try {
+      const res = await fetch("/api/agent/simulate-call", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          callerText: text,
+          callerNumber: config.businessPhone || "+1 (415) 329-8812",
+          history: updatedTranscript.map((t) => ({
+            sender: t.sender,
+            text: t.text,
+          })),
+        }),
+      });
+
+      let responseText = "";
+      if (res.ok) {
+        const data = await res.json();
+        responseText = data.reply;
+      } else {
+        responseText = generateAgentResponse(text);
+      }
+
+      setTimeout(() => {
+        const agentMsgId = `msg-${msgCounterRef.current++}-agent`;
+        const agentMsg: TranscriptMessage = {
+          id: agentMsgId,
+          sender: "agent",
+          text: responseText,
+          timestamp: formatTimer(callDuration + 1),
+        };
+        setTranscript((prev) => [...prev, agentMsg]);
+        speakAgentText(responseText);
+      }, latencyDelay);
+    } catch {
+      setTimeout(() => {
+        const fallback = generateAgentResponse(text);
+        const agentMsgId = `msg-${msgCounterRef.current++}-agent`;
+        const agentMsg: TranscriptMessage = {
+          id: agentMsgId,
+          sender: "agent",
+          text: fallback,
+          timestamp: formatTimer(callDuration + 1),
+        };
+        setTranscript((prev) => [...prev, agentMsg]);
+        speakAgentText(fallback);
+      }, latencyDelay);
+    }
   };
 
   // Speech Recognition support for live microphone testing

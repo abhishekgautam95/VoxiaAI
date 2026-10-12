@@ -11,6 +11,15 @@ interface AddAppointmentModalProps {
   onAdd: (newApt: Appointment) => void;
 }
 
+interface AvailabilitySlot {
+  time: string;
+  available: boolean;
+  bookedInfo?: {
+    appointmentId: string;
+    service?: string;
+  } | null;
+}
+
 export function AddAppointmentModal({
   isOpen,
   onClose,
@@ -21,12 +30,43 @@ export function AddAppointmentModal({
   const [email, setEmail] = useState("");
   const [serviceRequested, setServiceRequested] = useState(SERVICE_OPTIONS[0]);
   const [provider, setProvider] = useState(PROVIDER_OPTIONS[0]);
-  const [date, setDate] = useState("2026-10-10");
-  const [time, setTime] = useState("09:30 AM");
+  const [date, setDate] = useState("2026-10-14");
+  const [time, setTime] = useState("9:00 AM");
   const [durationMinutes, setDurationMinutes] = useState(45);
   const [status, setStatus] = useState<AppointmentStatus>("Confirmed");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  React.useEffect(() => {
+    if (!isOpen || !date) return;
+    let active = true;
+    const fetchSlots = () => {
+      fetch(`/api/calendar/availability?date=${date}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!active) return;
+          if (data?.slots && Array.isArray(data.slots)) {
+            setSlots(data.slots);
+            setTime((prevTime) => {
+              const match = data.slots.find((s: AvailabilitySlot) => s.time === prevTime);
+              if (match && match.available) return prevTime;
+              const firstOpen = data.slots.find((s: AvailabilitySlot) => s.available);
+              return firstOpen ? firstOpen.time : prevTime;
+            });
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (active) setLoadingSlots(false);
+        });
+    };
+    fetchSlots();
+    return () => {
+      active = false;
+    };
+  }, [isOpen, date]);
 
   if (!isOpen) return null;
 
@@ -196,33 +236,56 @@ export function AddAppointmentModal({
             </div>
 
             <div>
-              <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-cyan-400" /> Time Slot
+              <label className="text-xs font-medium text-zinc-300 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-cyan-400" /> Time Slot
+                </span>
+                <span className="text-[10px] text-zinc-400">
+                  {loadingSlots ? (
+                    "Checking..."
+                  ) : (
+                    <span className="text-emerald-400 font-mono">
+                      {slots.filter((s) => s.available).length} open
+                    </span>
+                  )}
+                </span>
               </label>
               <select
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-white focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 cursor-pointer"
               >
-                {[
-                  "08:30 AM",
-                  "09:00 AM",
-                  "09:30 AM",
-                  "10:00 AM",
-                  "10:30 AM",
-                  "11:15 AM",
-                  "01:00 PM",
-                  "01:30 PM",
-                  "02:15 PM",
-                  "03:00 PM",
-                  "03:30 PM",
-                  "04:30 PM",
-                  "05:00 PM",
-                ].map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
+                {slots.length > 0
+                  ? slots.map((s) => (
+                      <option
+                        key={s.time}
+                        value={s.time}
+                        disabled={!s.available}
+                        className={!s.available ? "text-zinc-500 bg-zinc-950" : ""}
+                      >
+                        {s.time} {!s.available ? " (Booked)" : " ✓ Available"}
+                      </option>
+                    ))
+                  : [
+                      "9:00 AM",
+                      "9:30 AM",
+                      "10:00 AM",
+                      "10:30 AM",
+                      "11:00 AM",
+                      "11:30 AM",
+                      "1:00 PM",
+                      "1:30 PM",
+                      "2:00 PM",
+                      "2:30 PM",
+                      "3:00 PM",
+                      "3:30 PM",
+                      "4:00 PM",
+                      "4:30 PM",
+                    ].map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
               </select>
             </div>
 

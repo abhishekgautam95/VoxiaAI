@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Calendar,
   List,
@@ -15,14 +15,28 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Appointment, ViewMode } from "@/components/dashboard/appointments/types";
-import { INITIAL_APPOINTMENTS } from "@/components/dashboard/appointments/mock-data";
 import { AppointmentsTable } from "@/components/dashboard/appointments/appointments-table";
 import { CalendarView } from "@/components/dashboard/appointments/calendar-view";
 import { AddAppointmentModal } from "@/components/dashboard/appointments/add-appointment-modal";
 import { RescheduleModal } from "@/components/dashboard/appointments/reschedule-modal";
 
+interface DbAppointmentRecord {
+  id: string;
+  customerName: string;
+  phoneNumber: string;
+  email?: string | null;
+  service: string;
+  provider?: string | null;
+  date: string;
+  time: string;
+  status: string;
+  notes?: string | null;
+  bookedBy?: string | null;
+  createdAt: string;
+}
+
 export default function AppointmentsPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>(INITIAL_APPOINTMENTS);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null);
@@ -35,9 +49,46 @@ export default function AppointmentsPage() {
     }, 3500);
   };
 
+  const [todayStr, setTodayStr] = useState("2026-10-14");
+
+  const loadAppointments = useCallback(() => {
+    fetch("/api/appointments")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        setTodayStr(new Date().toISOString().split("T")[0]);
+        if (Array.isArray(data?.appointments)) {
+          const mapped: Appointment[] = data.appointments.map((dbApt: DbAppointmentRecord) => ({
+            id: dbApt.id,
+            customerName: dbApt.customerName,
+            phone: dbApt.phoneNumber,
+            email: dbApt.email || "",
+            serviceRequested: dbApt.service,
+            date: dbApt.date,
+            time: dbApt.time,
+            durationMinutes: 45,
+            status:
+              dbApt.status === "CONFIRMED"
+                ? "Confirmed"
+                : dbApt.status === "COMPLETED"
+                ? "Completed"
+                : "Cancelled",
+            provider: dbApt.provider || "Dr. Sarah Smith",
+            notes: dbApt.notes || undefined,
+            bookedBy: dbApt.bookedBy?.includes("AI") ? "AI Voice Agent" : "Manual Entry",
+            createdAt: new Date(dbApt.createdAt).toISOString(),
+          }));
+          setAppointments(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadAppointments();
+  }, [loadAppointments]);
+
   // Stats Bar calculations
   const stats = useMemo(() => {
-    const todayStr = "2026-10-10";
     const totalToday = appointments.filter((apt) => apt.date === todayStr).length;
     const upcomingThisWeek = appointments.filter(
       (apt) => apt.date >= todayStr && apt.status === "Confirmed"
@@ -55,56 +106,122 @@ export default function AppointmentsPage() {
       cancelledCount,
       completedCount,
     };
-  }, [appointments]);
+  }, [appointments, todayStr]);
 
   // Handler: Add Appointment
-  const handleAddAppointment = (newApt: Appointment) => {
-    setAppointments((prev) => [newApt, ...prev]);
-    showToast(`Appointment confirmed for ${newApt.customerName} on ${newApt.date} at ${newApt.time}!`);
+  const handleAddAppointment = async (newApt: Appointment) => {
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: newApt.customerName,
+          phoneNumber: newApt.phone,
+          email: newApt.email || undefined,
+          service: newApt.serviceRequested,
+          provider: newApt.provider,
+          date: newApt.date,
+          time: newApt.time,
+          notes: newApt.notes,
+          bookedBy: "Staff Entry",
+        }),
+      });
+
+      if (res.ok) {
+        await loadAppointments();
+        showToast(`Appointment confirmed for ${newApt.customerName} on ${newApt.date} at ${newApt.time}!`);
+      } else {
+        const err = await res.json();
+        showToast(`Failed: ${err.error || "Could not save appointment"}`);
+      }
+    } catch {
+      showToast("Error connecting to server.");
+    }
   };
 
   // Handler: Cancel Appointment
-  const handleCancelAppointment = (aptId: string) => {
-    setAppointments((prev) =>
-      prev.map((apt) =>
-        apt.id === aptId ? { ...apt, status: "Cancelled" as const } : apt
-      )
-    );
-    showToast("Appointment status updated to Cancelled.");
+  const handleCancelAppointment = async (aptId: string) => {
+    try {
+      const res = await fetch(`/api/appointments/${aptId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+
+      if (res.ok) {
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt.id === aptId ? { ...apt, status: "Cancelled" as const } : apt
+          )
+        );
+        showToast("Appointment status updated to Cancelled.");
+      }
+    } catch {
+      showToast("Failed to cancel appointment.");
+    }
   };
 
   // Handler: Mark Completed
-  const handleCompleteAppointment = (aptId: string) => {
-    setAppointments((prev) =>
-      prev.map((apt) =>
-        apt.id === aptId ? { ...apt, status: "Completed" as const } : apt
-      )
-    );
-    showToast("Appointment marked as Completed.");
+  const handleCompleteAppointment = async (aptId: string) => {
+    try {
+      const res = await fetch(`/api/appointments/${aptId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "COMPLETED" }),
+      });
+
+      if (res.ok) {
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt.id === aptId ? { ...apt, status: "Completed" as const } : apt
+          )
+        );
+        showToast("Appointment marked as Completed.");
+      }
+    } catch {
+      showToast("Failed to complete appointment.");
+    }
   };
 
   // Handler: Reschedule Appointment
-  const handleRescheduleAppointment = (
+  const handleRescheduleAppointment = async (
     aptId: string,
     newDate: string,
     newTime: string,
     reason?: string
   ) => {
-    setAppointments((prev) =>
-      prev.map((apt) => {
-        if (apt.id === aptId) {
-          return {
-            ...apt,
-            date: newDate,
-            time: newTime,
-            status: "Confirmed" as const,
-            notes: reason ? `${apt.notes || ""} [Rescheduled: ${reason}]` : apt.notes,
-          };
-        }
-        return apt;
-      })
-    );
-    showToast(`Appointment rescheduled to ${newDate} at ${newTime}.`);
+    try {
+      const res = await fetch(`/api/appointments/${aptId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: newDate,
+          time: newTime,
+          status: "CONFIRMED",
+          reason,
+        }),
+      });
+
+      if (res.ok) {
+        setAppointments((prev) =>
+          prev.map((apt) => {
+            if (apt.id === aptId) {
+              return {
+                ...apt,
+                date: newDate,
+                time: newTime,
+                status: "Confirmed" as const,
+                notes: reason ? `${apt.notes || ""} [Rescheduled: ${reason}]` : apt.notes,
+              };
+            }
+            return apt;
+          })
+        );
+        showToast(`Appointment rescheduled to ${newDate} at ${newTime}.`);
+      }
+    } catch {
+      showToast("Failed to reschedule appointment.");
+    }
   };
 
   // Handler: Export to CSV
