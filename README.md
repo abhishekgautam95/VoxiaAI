@@ -18,7 +18,7 @@
   <b>VoxiaAI</b> is an enterprise-grade, full-stack voice orchestration platform designed to eliminate unanswered calls, long hold queues, and rigid IVR trees with autonomous conversational AI receptionists. Operating 24/7 with human cadence, sub-300ms acoustic streaming, RAG knowledge retrieval, real-time conflict-free calendar booking, and HIPAA-compliant audit trails.
 </p>
 
-[Executive Overview](#-executive-overview) • [System Architecture](#-system-architecture--telephony-pipeline) • [Key Metrics](#-benchmark-metrics) • [Core Capabilities](#-core-capabilities) • [Repository Structure](#-repository-structure) • [Database & Schema](#-database-architecture--prisma-orm) • [API Reference](#-rest-api-reference) • [Getting Started](#-getting-started) • [Security & Compliance](#-security--hipaa-compliance)
+[Executive Overview](#-executive-overview) • [System Architecture](#-system-architecture--telephony-pipeline) • [Key Metrics](#-benchmark-metrics) • [Core Capabilities](#-core-capabilities) • [Repository Structure](#-repository-structure) • [Database & Schema](#-database-architecture--prisma-orm) • [API Reference](#-rest-api-reference) • [Getting Started](#-getting-started) • [Contributing](CONTRIBUTING.md) • [Security](SECURITY.md)
 
 </div>
 
