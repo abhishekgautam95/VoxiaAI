@@ -1,0 +1,314 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum CallStatus {
+  COMPLETED
+  MISSED
+  APPOINTMENT_BOOKED
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum CredentialKind {
+  API_KEY
+  WEBHOOK_SECRET
+}
+
+enum IntegrationProvider {
+  TWILIO
+  TELNYX
+  DEEPGRAM
+  OPENAI
+  GEMINI
+  ELEVENLABS
+  GOOGLE_CALENDAR
+  CAL_COM
+  SMS
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  DEGRADED
+}
+
+enum WebhookProcessingStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  DUPLICATE
+}
+
+model Organization {
+  id                String              @id @default(cuid())
+  slug              String              @unique
+  name              String
+  timezone          String              @default("UTC")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  memberships       Membership[]
+  agentConfig       AgentConfig?
+  phoneNumbers      PhoneNumber[]
+  calls             Call[]
+  appointments      Appointment[]
+  businessHours     BusinessHour[]
+  integrations      Integration[]
+  credentials       Credential[]
+  auditEvents       AuditEvent[]
+  webhookEvents     WebhookEvent[]
+
+  @@index([createdAt])
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  fullName      String
+  passwordHash  String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  memberships   Membership[]
+  sessions      Session[]
+  auditEvents   AuditEvent[]
+
+  @@index([createdAt])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  tokenHash    String   @unique
+  userId       String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Membership {
+  id              String         @id @default(cuid())
+  organizationId  String
+  userId          String
+  role            MembershipRole
+  createdAt       DateTime       @default(now())
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, role])
+}
+
+model AgentConfig {
+  id                      String   @id @default(cuid())
+  organizationId          String   @unique
+  businessName            String
+  businessCategory        String
+  primaryLanguage         String
+  businessPhone           String
+  officeHours             String
+  businessAddress         String
+  greetingMessage         String
+  agentName               String
+  systemPrompt            String   @db.Text
+  selectedTemplateId      String
+  conversationTone        String
+  interruptionSensitivity String
+  verbosity               String
+  latencyMode             String
+  transferKeywords        String
+  selectedVoiceId         String
+  voiceStability          Float
+  clarityBoost            Float
+  speakingRate            Float
+  ambientNoise            String
+  calendarBookingEnabled  Boolean  @default(true)
+  faqKnowledgeEnabled     Boolean  @default(true)
+  callRecordingEnabled    Boolean  @default(true)
+  smsFollowUpEnabled      Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  organization            Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model PhoneNumber {
+  id              String       @id @default(cuid())
+  organizationId  String
+  provider        IntegrationProvider
+  e164Number      String
+  region          String
+  label           String
+  routingStatus   String
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  calls           Call[]
+
+  @@index([organizationId, createdAt])
+  @@unique([organizationId, e164Number])
+}
+
+model Call {
+  id               String       @id @default(cuid())
+  organizationId   String
+  phoneNumberId    String?
+  externalCallId   String
+  startedAt        DateTime
+  endedAt          DateTime?
+  durationSeconds  Int          @default(0)
+  callerNumber     String
+  status           CallStatus
+  aiSummary        String       @default("") @db.Text
+  keyTakeaways     Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  phoneNumber      PhoneNumber? @relation(fields: [phoneNumberId], references: [id], onDelete: SetNull)
+  transcriptTurns  CallTranscriptTurn[]
+  appointments     Appointment[]
+
+  @@index([organizationId, startedAt])
+  @@index([organizationId, status])
+  @@unique([organizationId, externalCallId])
+}
+
+model CallTranscriptTurn {
+  id          String   @id @default(cuid())
+  callId      String
+  turnIndex   Int
+  role        String
+  text        String   @db.Text
+  timestampMs Int
+  createdAt   DateTime @default(now())
+  call        Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@unique([callId, turnIndex])
+  @@index([callId, timestampMs])
+}
+
+model Appointment {
+  id               String            @id @default(cuid())
+  organizationId   String
+  callId           String?
+  customerName     String
+  phone            String
+  email            String
+  serviceRequested String
+  scheduledStart   DateTime
+  durationMinutes  Int
+  status           AppointmentStatus
+  provider         String
+  notes            String?
+  bookedBy         String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  call             Call?             @relation(fields: [callId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, scheduledStart])
+  @@index([organizationId, status])
+}
+
+model BusinessHour {
+  id              String       @id @default(cuid())
+  organizationId  String
+  dayOfWeek       Int
+  openTime        String
+  closeTime       String
+  isClosed        Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, dayOfWeek])
+}
+
+model Integration {
+  id                  String              @id @default(cuid())
+  organizationId      String
+  provider            IntegrationProvider
+  status              IntegrationStatus
+  configMetadata      Json?
+  credentialReference String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  organization        Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, provider])
+}
+
+model Credential {
+  id                String         @id @default(cuid())
+  organizationId    String
+  provider          IntegrationProvider
+  kind              CredentialKind
+  keyLabel          String
+  keyPrefix         String
+  lastFour          String
+  secretCiphertext  String
+  createdAt         DateTime       @default(now())
+  rotatedAt         DateTime?
+  organization      Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, provider, kind])
+}
+
+model WebhookEvent {
+  id                  String                  @id @default(cuid())
+  organizationId      String?
+  provider            IntegrationProvider
+  eventId             String
+  eventType           String
+  idempotencyKey      String
+  signatureValid      Boolean                 @default(false)
+  rawPayload          Json
+  redactedPayload     Json
+  status              WebhookProcessingStatus @default(RECEIVED)
+  errorMessage        String?
+  receivedAt          DateTime                @default(now())
+  processedAt         DateTime?
+  organization        Organization?           @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, idempotencyKey])
+  @@index([provider, eventId])
+  @@index([organizationId, receivedAt])
+}
+
+model AuditEvent {
+  id               String       @id @default(cuid())
+  organizationId   String
+  userId           String?
+  action           String
+  targetType       String
+  targetId         String?
+  metadata         Json?
+  correlationId    String
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime     @default(now())
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user             User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, action])
+}
