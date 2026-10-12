@@ -6,15 +6,17 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
+---
+
 ## Our Standards
 
 Examples of behavior that contributes to a positive environment for our community include:
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the overall community
+* **Demonstrating empathy and kindness** toward other people
+* **Being respectful of differing opinions**, viewpoints, and experiences
+* **Giving and gracefully accepting constructive feedback**
+* **Accepting responsibility** and apologizing to those affected by our mistakes, and learning from the experience
+* **Focusing on what is best** not just for us as individuals, but for the overall community
 
 Examples of unacceptable behavior include:
 
@@ -24,17 +26,23 @@ Examples of unacceptable behavior include:
 * Publishing others' private information, such as a physical or email address, without their explicit permission
 * Other conduct which could reasonably be considered inappropriate in a professional setting
 
+---
+
 ## Enforcement Responsibilities
 
 Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
 
 Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
 
+---
+
 ## Scope
 
-This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces.
+This Code of Conduct applies within all community spaces, including issues, pull requests, discussions, code reviews, and project communication channels. It also applies when an individual is officially representing the community in public spaces.
 
-## Enforcement Guidelines
+---
+
+## Enforcement Guidelines (Consequence Ladder)
 
 Community leaders will follow these Enforcement Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:
 
@@ -54,9 +62,27 @@ Community leaders will follow these Enforcement Guidelines in determining the co
 * **Community Impact**: Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an individual, or aggression toward or disparagement of classes of individuals.
 * **Consequence**: A permanent ban from any sort of public interaction within the community.
 
-## Reporting & Contact
+---
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project leaders at the repository's contact channels. All complaints will be reviewed and investigated promptly and fairly. All community leaders are obligated to respect the privacy and security of the reporter of any incident.
+## Remedies and Conflict Resolution
+
+When a Code of Conduct report is addressed, community leaders prioritize fair resolution and restoring community health. Depending on the context, remedies may include:
+
+* **Mediation**: Facilitating a respectful, constructive dialogue between affected parties.
+* **Voluntary Correction**: Permitting the contributor to edit, retract, or rephrase inappropriate comments, issues, or pull requests.
+* **Public or Private Apology**: Requesting a sincere acknowledgment of impact and a renewed commitment to community standards.
+* **Mentorship & Guidance**: Providing actionable advice on communication norms in open-source collaboration.
+* **Appeals Process**: If an individual believes a moderation decision was made in error, they may submit an appeal to the repository maintainers with relevant context. Appeals are evaluated objectively by the maintainers.
+
+---
+
+## Reporting & Incident Handling
+
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project leaders at the repository's contact channels or via private security advisories. 
+
+All complaints will be reviewed and investigated promptly, fairly, and confidentially. Community leaders are obligated to respect the privacy and security of the reporter of any incident.
+
+---
 
 ## Attribution
 
