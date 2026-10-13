@@ -283,6 +283,25 @@ model AuditLog {
   metadata       Json        @default("{}")
   createdAt      DateTime    @default(now())
 }
+
+model Subscription {
+  id              String             @id @default(cuid())
+  tier            SubscriptionTier   @default(PRO)
+  status          SubscriptionStatus @default(ACTIVE)
+  includedMinutes Int                @default(1000)
+  usedMinutes     Int                @default(0)
+  includedNumbers Int                @default(3)
+  extraMinuteRate Float              @default(0.15)
+}
+
+model Invoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String   @unique
+  amountDueCents  Int
+  amountPaidCents Int
+  status          String   @default("PAID")
+  pdfUrl          String?
+}
 ```
 
 ---
@@ -301,8 +320,11 @@ All protected endpoints require an authenticated organization session cookie (`v
 | `/api/appointments` | `GET` / `POST` | List appointments or create new booking with conflict check |
 | `/api/appointments/[id]` | `PATCH` / `DELETE`| Reschedule, cancel, or remove an appointment |
 | `/api/calendar/availability`| `GET` | Retrieve conflict-free time slots for a given date |
+| `/api/integrations/calendar/connect`| `POST` / `DELETE`| Connect 2-way Google Calendar / Cal.com sync & conflict buffer |
 | `/api/calls` | `GET` | List historical calls with pagination, search, and status filter |
 | `/api/analytics` | `GET` | Compute live financial savings, deflection, and KPIs |
+| `/api/billing` | `GET` / `POST` | Query minute quotas, plan tier upgrades, and invoices |
+| `/api/health` | `GET` | Real-time diagnostic telemetry probe & DB latency (ms) |
 | `/api/knowledge-base` | `GET` / `POST` | List indexed documents or upload a new clinic FAQ/policy |
 | `/api/knowledge-base/[id]`| `PATCH` / `DELETE`| Update document content or remove from RAG index |
 | `/api/phone-numbers` | `GET` / `POST` | View active carrier lines or provision a new number |
@@ -355,10 +377,11 @@ npx prisma db push
 # Generate Prisma Client
 npx prisma generate
 
-# Seed sample organization, appointments, calls, phone numbers, knowledge base & audit logs
+# Seed sample organization, appointments, calls, phone numbers, knowledge base, audit logs & billing
 node scripts/seed-data.mjs
 node scripts/seed-knowledge-base.mjs
 node scripts/seed-audit-logs.mjs
+node scripts/seed-billing.mjs
 ```
 
 ### 5. Launch the Turbopack Dev Server

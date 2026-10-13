@@ -26,6 +26,21 @@ enum AuditAction {
   INTEGRATION_UPDATED
   PHONE_PROVISIONED
   KNOWLEDGE_BASE_UPDATED
+  SUBSCRIPTION_UPDATED
+  INVOICE_GENERATED
+}
+
+enum SubscriptionTier {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
 }
 
 enum AppointmentStatus {
@@ -75,6 +90,8 @@ model Organization {
   phoneNumbers PhoneNumber[]
   integrations IntegrationConfig[]
   knowledgeDocs KnowledgeDocument[]
+  subscription  Subscription?
+  invoices      Invoice[]
 }
 
 model User {
@@ -259,4 +276,39 @@ model KnowledgeDocument {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, category])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  tier                 SubscriptionTier   @default(PRO)
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  includedMinutes      Int                @default(1000)
+  usedMinutes          Int                @default(342)
+  includedNumbers      Int                @default(3)
+  extraMinuteRate      Float              @default(0.15)
+  currentPeriodStart   DateTime           @default(now())
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id              String       @id @default(cuid())
+  organizationId  String
+  invoiceNumber   String       @unique
+  amountDueCents  Int
+  amountPaidCents Int
+  status          String       @default("PAID")
+  periodStart     DateTime
+  periodEnd       DateTime
+  pdfUrl          String?
+  createdAt       DateTime     @default(now())
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
 }
