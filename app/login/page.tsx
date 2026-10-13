@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Bot, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, Building2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Bot, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, Building2, Zap } from "lucide-react";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams.get("redirect") || "/dashboard";
 
@@ -20,6 +19,39 @@ function LoginForm() {
     setPassword("VoxiaDemo!2026");
     setOrgSlug("apex-health-dental");
     setErrorMessage(null);
+  };
+
+  const handleQuickDemoLogin = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    setEmail("demo.owner@voxia.local");
+    setPassword("VoxiaDemo!2026");
+    setOrgSlug("apex-health-dental");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "demo.owner@voxia.local",
+          password: "VoxiaDemo!2026",
+          organizationSlug: "apex-health-dental",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(data.error || "Failed to authenticate.");
+        setIsLoading(false);
+        return;
+      }
+
+      window.location.href = redirectTarget;
+    } catch {
+      setErrorMessage("Network error occurred. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,8 +78,7 @@ function LoginForm() {
         return;
       }
 
-      router.push(redirectTarget);
-      router.refresh();
+      window.location.href = redirectTarget;
     } catch {
       setErrorMessage("Network error occurred. Please try again.");
       setIsLoading(false);
@@ -67,21 +98,32 @@ function LoginForm() {
       </div>
 
       {/* Demo Credentials Quick Fill Banner */}
-      <div className="mt-5 rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-3.5 text-xs">
+      <div className="mt-5 rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-3.5 text-xs space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-cyan-300 font-medium">
             <Sparkles className="h-4 w-4 text-cyan-400" />
-            <span>Try with Seeded Demo Account</span>
+            <span>Seeded Demo Workspace Account</span>
           </div>
-          <button
-            type="button"
-            onClick={fillDemoCredentials}
-            className="rounded-lg bg-cyan-500/20 px-2.5 py-1 font-semibold text-cyan-300 hover:bg-cyan-500/30 transition-colors"
-          >
-            Auto-fill
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={fillDemoCredentials}
+              className="rounded-lg bg-zinc-800 px-2 py-1 text-[11px] font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+            >
+              Fill Inputs
+            </button>
+            <button
+              type="button"
+              onClick={handleQuickDemoLogin}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 px-3 py-1 font-semibold text-white shadow-md shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all disabled:opacity-50 text-[11px]"
+            >
+              <Zap className="h-3 w-3" />
+              <span>1-Click Sign In</span>
+            </button>
+          </div>
         </div>
-        <p className="mt-1 text-[11px] text-zinc-400">
+        <p className="text-[11px] text-zinc-400">
           Email: <span className="text-zinc-200 font-mono">demo.owner@voxia.local</span> • Pass: <span className="text-zinc-200 font-mono">VoxiaDemo!2026</span>
         </p>
       </div>
