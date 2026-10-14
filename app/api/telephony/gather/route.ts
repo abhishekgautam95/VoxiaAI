@@ -52,6 +52,74 @@ export async function POST(request: Request) {
   let replyText = "";
   let shouldHangup = false;
 
+  const conf =
+    agentConfig?.configuration && typeof agentConfig.configuration === "object"
+      ? (agentConfig.configuration as Record<string, unknown>)
+      : {};
+
+  const transferKeywordsRaw =
+    typeof conf.transferKeywords === "string"
+      ? conf.transferKeywords
+      : "human, operator, person, emergency, severe pain, doctor, receptionist, speak to someone";
+
+  const transferKeywords = transferKeywordsRaw
+    .split(",")
+    .map((k) => k.trim().toLowerCase())
+    .filter(Boolean);
+
+  const isTransferRequested = transferKeywords.some((kw) => lower.includes(kw));
+
+  if (isTransferRequested) {
+    const destinationPhone = agentConfig?.phoneNumber || "+14158004291";
+    recordAuditLog({
+      organizationId: organization.id,
+      action: "INTEGRATION_UPDATED",
+      entityType: "CallTransfer",
+      entityId: callSid || null,
+      metadata: {
+        reason: "Human escalation triggered via speech keywords",
+        callerText: speechResult,
+        transferTo: destinationPhone,
+        callSid,
+      },
+    }).catch(() => {});
+
+    if (callSid) {
+      const callRecord = await db.callRecord.findUnique({ where: { callId: callSid } });
+      if (callRecord) {
+        if (speechResult) {
+          await db.callTranscript.create({
+            data: {
+              callRecordId: callRecord.id,
+              role: CallRole.USER,
+              text: speechResult,
+              timestamp: "0:05",
+            },
+          });
+        }
+        await db.callTranscript.create({
+          data: {
+            callRecordId: callRecord.id,
+            role: CallRole.AI,
+            text: "Please hold while I transfer you to our front desk staff.",
+            timestamp: "0:08",
+          },
+        });
+      }
+    }
+
+    const transferTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="Polly.Joanna-Neural">Please hold while I transfer you to our front desk staff.</Say>
+  <Dial>${destinationPhone}</Dial>
+</Response>`;
+
+    return new Response(transferTwiml, {
+      status: 200,
+      headers: { "Content-Type": "text/xml" },
+    });
+  }
+
   if (
     lower.includes("appointment") ||
     lower.includes("book") ||
@@ -62,7 +130,36 @@ export async function POST(request: Request) {
     const appointmentDate = new Date();
     appointmentDate.setDate(appointmentDate.getDate() + 1);
     const dateStr = appointmentDate.toISOString().split("T")[0];
-    const timeSlot = "10:30 AM";
+    const preferredSlot = lower.includes("afternoon") ? "02:00 PM" : "10:30 AM";
+
+    const candidateSlots = [
+      "09:00 AM",
+      "10:00 AM",
+      "10:30 AM",
+      "11:30 AM",
+      "01:30 PM",
+      "02:00 PM",
+      "03:30 PM",
+      "04:30 PM",
+    ];
+
+    const bookedAppointments = await db.appointment.findMany({
+      where: {
+        organizationId: organization.id,
+        date: dateStr,
+        status: AppointmentStatus.CONFIRMED,
+      },
+      select: { time: true },
+    });
+    const bookedTimes = new Set(bookedAppointments.map((a) => a.time));
+
+    let timeSlot = preferredSlot;
+    if (bookedTimes.has(timeSlot)) {
+      const nextOpen = candidateSlots.find((s) => !bookedTimes.has(s));
+      if (nextOpen) {
+        timeSlot = nextOpen;
+      }
+    }
 
     // Auto-create real appointment
     const createdApt = await db.appointment.create({
@@ -113,7 +210,7 @@ export async function POST(request: Request) {
       provider: createdApt.provider,
     }).catch(() => {});
 
-    replyText = `Wonderful! I have reserved tomorrow, ${dateStr} at 10:30 AM for your cleaning with Dr. Smith. We sent a confirmation SMS to your number. Is there anything else I can help you with?`;
+    replyText = `Wonderful! I have reserved tomorrow, ${dateStr} at ${timeSlot} for your cleaning with Dr. Smith. We sent a confirmation SMS to your number. Is there anything else I can help you with?`;
   } else if (lower.includes("hour") || lower.includes("open") || lower.includes("close") || lower.includes("time")) {
     replyText = `Our regular clinic operating hours are ${officeHours}. Would you like to schedule an appointment?`;
   } else if (lower.includes("where") || lower.includes("address") || lower.includes("location") || lower.includes("direction")) {

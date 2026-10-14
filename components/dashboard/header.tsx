@@ -143,6 +143,31 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
       .catch(() => {});
   }, []);
 
+  const handleSelectOrg = async (org: Organization) => {
+    setSelectedOrg(org);
+    setIsOrgDropdownOpen(false);
+    try {
+      const res = await fetch("/api/auth/switch-org", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          organizationId: org.id,
+          name: org.name,
+          phone: org.phone,
+        }),
+      });
+      if (res.ok) {
+        window.location.reload();
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleTestCall = () => {
+    router.push("/dashboard/agent?testCall=true");
+  };
+
   const handleSignOut = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -240,10 +265,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                     <button
                       key={org.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedOrg(org);
-                        setIsOrgDropdownOpen(false);
-                      }}
+                      onClick={() => handleSelectOrg(org)}
                       className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors ${
                         isSelected
                           ? "bg-zinc-800/80 text-white"
@@ -334,6 +356,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         {/* Quick Test Call Simulator Button */}
         <button
           type="button"
+          onClick={handleTestCall}
           className="hidden sm:flex items-center gap-1.5 rounded-lg border border-zinc-700/70 bg-gradient-to-r from-zinc-800/90 to-zinc-900 px-2.5 py-1.5 text-xs font-medium text-zinc-200 shadow-sm transition-all hover:border-cyan-500/50 hover:text-white hover:shadow-cyan-500/10"
         >
           <PhoneCall className="h-3.5 w-3.5 text-cyan-400" />

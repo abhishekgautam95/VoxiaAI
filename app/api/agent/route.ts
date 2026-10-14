@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 const agentConfigSchema = z.object({
   displayName: z.string().trim().min(1).max(120),
@@ -16,6 +17,20 @@ const agentConfigSchema = z.object({
   latencyMode: z.string().default("ultra_low"),
   tone: z.string().default("warm"),
   interruptible: z.boolean().default(true),
+  configuration: z.record(z.string(), z.any()).optional().default({}),
+  // Optional direct configuration fields for convenience
+  voiceStability: z.number().optional(),
+  clarityBoost: z.number().optional(),
+  speakingRate: z.number().optional(),
+  ambientNoise: z.string().optional(),
+  transferKeywords: z.string().optional(),
+  greetingMessage: z.string().optional(),
+  selectedTemplateId: z.string().optional(),
+  verbosity: z.string().optional(),
+  calendarBookingEnabled: z.boolean().optional(),
+  faqKnowledgeEnabled: z.boolean().optional(),
+  callRecordingEnabled: z.boolean().optional(),
+  smsFollowUpEnabled: z.boolean().optional(),
 });
 
 export async function GET() {
@@ -54,16 +69,56 @@ export async function PUT(request: Request) {
     return Response.json({ error: "Validation failed", details: errorDetails }, { status: 400 });
   }
 
+  // Fetch existing agent to preserve existing configuration keys if needed
+  const existingAgent = await db.agentConfig.findUnique({
+    where: { organizationId: session.organizationId },
+  });
+  const existingConfig =
+    existingAgent?.configuration && typeof existingAgent.configuration === "object"
+      ? (existingAgent.configuration as Record<string, unknown>)
+      : {};
+
+  const mergedConfig: Record<string, unknown> = {
+    ...existingConfig,
+    ...(body.configuration || {}),
+    ...(body.voiceStability !== undefined ? { voiceStability: body.voiceStability } : {}),
+    ...(body.clarityBoost !== undefined ? { clarityBoost: body.clarityBoost } : {}),
+    ...(body.speakingRate !== undefined ? { speakingRate: body.speakingRate } : {}),
+    ...(body.ambientNoise !== undefined ? { ambientNoise: body.ambientNoise } : {}),
+    ...(body.transferKeywords !== undefined ? { transferKeywords: body.transferKeywords } : {}),
+    ...(body.greetingMessage !== undefined ? { greetingMessage: body.greetingMessage } : {}),
+    ...(body.selectedTemplateId !== undefined ? { selectedTemplateId: body.selectedTemplateId } : {}),
+    ...(body.verbosity !== undefined ? { verbosity: body.verbosity } : {}),
+    ...(body.calendarBookingEnabled !== undefined ? { calendarBookingEnabled: body.calendarBookingEnabled } : {}),
+    ...(body.faqKnowledgeEnabled !== undefined ? { faqKnowledgeEnabled: body.faqKnowledgeEnabled } : {}),
+    ...(body.callRecordingEnabled !== undefined ? { callRecordingEnabled: body.callRecordingEnabled } : {}),
+    ...(body.smsFollowUpEnabled !== undefined ? { smsFollowUpEnabled: body.smsFollowUpEnabled } : {}),
+  };
+
+  const coreFields = {
+    displayName: body.displayName,
+    businessName: body.businessName,
+    businessType: body.businessType,
+    businessAddress: body.businessAddress,
+    officeHours: body.officeHours,
+    phoneNumber: body.phoneNumber,
+    systemPrompt: body.systemPrompt,
+    voiceId: body.voiceId,
+    voiceName: body.voiceName,
+    primaryLanguage: body.primaryLanguage,
+    latencyMode: body.latencyMode,
+    tone: body.tone,
+    interruptible: body.interruptible,
+    configuration: mergedConfig as Prisma.InputJsonValue,
+    deployedAt: new Date(),
+  };
+
   const updatedAgent = await db.agentConfig.upsert({
     where: { organizationId: session.organizationId },
-    update: {
-      ...body,
-      deployedAt: new Date(),
-    },
+    update: coreFields,
     create: {
       organizationId: session.organizationId,
-      ...body,
-      deployedAt: new Date(),
+      ...coreFields,
     },
   });
 

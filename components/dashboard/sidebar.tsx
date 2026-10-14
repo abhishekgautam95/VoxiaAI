@@ -79,19 +79,43 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
     calls: 4,
     appointments: 6,
   });
+  const [billingUsage, setBillingUsage] = useState({
+    usedMinutes: 342,
+    includedMinutes: 1000,
+    percentMinutesUsed: 34,
+  });
+  const [agentInfo, setAgentInfo] = useState({
+    displayName: "Sarah (Front Desk)",
+    phoneNumber: "+1 (415) 800-4291",
+  });
 
   useEffect(() => {
     Promise.all([
       fetch("/api/calls").then((r) => (r.ok ? r.json() : null)),
       fetch("/api/appointments").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/billing").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/agent").then((r) => (r.ok ? r.json() : null)),
     ])
-      .then(([callsData, apptsData]) => {
-        setCounts({
-          calls: Array.isArray(callsData?.calls) ? callsData.calls.length : 4,
-          appointments: Array.isArray(apptsData?.appointments)
-            ? apptsData.appointments.length
-            : 6,
-        });
+      .then(([callsData, apptsData, billingData, agentData]) => {
+        if (callsData?.calls && Array.isArray(callsData.calls)) {
+          setCounts((prev) => ({ ...prev, calls: callsData.calls.length }));
+        }
+        if (apptsData?.appointments && Array.isArray(apptsData.appointments)) {
+          setCounts((prev) => ({ ...prev, appointments: apptsData.appointments.length }));
+        }
+        if (billingData?.usage) {
+          setBillingUsage({
+            usedMinutes: billingData.usage.usedMinutes ?? 342,
+            includedMinutes: billingData.usage.includedMinutes ?? 1000,
+            percentMinutesUsed: billingData.usage.percentMinutesUsed ?? 34,
+          });
+        }
+        if (agentData?.agent) {
+          setAgentInfo({
+            displayName: agentData.agent.displayName || "Sarah (Front Desk)",
+            phoneNumber: agentData.agent.phoneNumber || "+1 (415) 800-4291",
+          });
+        }
       })
       .catch(() => {});
   }, []);
@@ -254,10 +278,10 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-medium text-zinc-200">
-                  Sarah (Front Desk)
+                  {agentInfo.displayName}
                 </p>
                 <p className="truncate text-[10px] text-zinc-400">
-                  +1 (415) 800-4291
+                  {agentInfo.phoneNumber}
                 </p>
               </div>
             </div>
@@ -279,20 +303,26 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
               <Zap className="h-3.5 w-3.5 text-amber-400" /> Voice Minutes
             </span>
             <span className="text-[11px] font-semibold text-zinc-400">
-              1,420 / 2,500
+              {billingUsage.usedMinutes.toLocaleString()} / {billingUsage.includedMinutes.toLocaleString()}
             </span>
           </div>
 
           {/* Progress Bar */}
           <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 transition-all duration-300"
-              style={{ width: "56.8%" }}
+              className={`h-full rounded-full transition-all duration-300 ${
+                billingUsage.percentMinutesUsed > 90
+                  ? "bg-rose-500"
+                  : billingUsage.percentMinutesUsed > 75
+                  ? "bg-amber-500"
+                  : "bg-gradient-to-r from-cyan-500 to-indigo-500"
+              }`}
+              style={{ width: `${Math.min(billingUsage.percentMinutesUsed, 100)}%` }}
             />
           </div>
 
           <div className="mt-2 flex items-center justify-between text-[10px] text-zinc-400">
-            <span>56% consumed</span>
+            <span>{billingUsage.percentMinutesUsed}% consumed</span>
             <Link
               href="/dashboard/settings"
               className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"

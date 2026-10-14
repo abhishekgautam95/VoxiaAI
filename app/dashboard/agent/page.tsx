@@ -30,26 +30,97 @@ export default function AgentConfigPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isFloatingCallOpen, setIsFloatingCallOpen] = useState(false);
+  const [isFloatingCallOpen, setIsFloatingCallOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("testCall") === "true";
+    }
+    return false;
+  });
 
   // Load config from database on mount
   useEffect(() => {
+
     fetch("/api/agent")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.agent) {
           const dbAgent = data.agent;
+          const conf =
+            dbAgent.configuration && typeof dbAgent.configuration === "object"
+              ? (dbAgent.configuration as Record<string, unknown>)
+              : {};
+
           const merged: AgentConfig = {
             ...DEFAULT_AGENT_CONFIG,
             businessName: dbAgent.businessName || DEFAULT_AGENT_CONFIG.businessName,
+            businessCategory:
+              (dbAgent.businessType as AgentConfig["businessCategory"]) ||
+              DEFAULT_AGENT_CONFIG.businessCategory,
             businessAddress: dbAgent.businessAddress || DEFAULT_AGENT_CONFIG.businessAddress,
             officeHours: dbAgent.officeHours || DEFAULT_AGENT_CONFIG.officeHours,
             businessPhone: dbAgent.phoneNumber || DEFAULT_AGENT_CONFIG.businessPhone,
-            agentName: dbAgent.displayName?.split(" ")[0] || DEFAULT_AGENT_CONFIG.agentName,
+            agentName:
+              dbAgent.displayName?.replace(/\s*\(AI Receptionist\)$/i, "") ||
+              DEFAULT_AGENT_CONFIG.agentName,
             systemPrompt: dbAgent.systemPrompt || DEFAULT_AGENT_CONFIG.systemPrompt,
             selectedVoiceId: dbAgent.voiceId || DEFAULT_AGENT_CONFIG.selectedVoiceId,
-            primaryLanguage: (dbAgent.primaryLanguage as AgentConfig["primaryLanguage"]) || DEFAULT_AGENT_CONFIG.primaryLanguage,
-            latencyMode: (dbAgent.latencyMode as AgentConfig["latencyMode"]) || DEFAULT_AGENT_CONFIG.latencyMode,
+            primaryLanguage:
+              (dbAgent.primaryLanguage as AgentConfig["primaryLanguage"]) ||
+              DEFAULT_AGENT_CONFIG.primaryLanguage,
+            latencyMode:
+              (dbAgent.latencyMode as AgentConfig["latencyMode"]) ||
+              DEFAULT_AGENT_CONFIG.latencyMode,
+            conversationTone:
+              (dbAgent.tone as AgentConfig["conversationTone"]) ||
+              DEFAULT_AGENT_CONFIG.conversationTone,
+            interruptionSensitivity: dbAgent.interruptible ? "balanced" : "low",
+
+            // Configuration JSON properties
+            greetingMessage:
+              typeof conf.greetingMessage === "string"
+                ? conf.greetingMessage
+                : DEFAULT_AGENT_CONFIG.greetingMessage,
+            selectedTemplateId:
+              typeof conf.selectedTemplateId === "string"
+                ? conf.selectedTemplateId
+                : DEFAULT_AGENT_CONFIG.selectedTemplateId,
+            verbosity:
+              (conf.verbosity as AgentConfig["verbosity"]) || DEFAULT_AGENT_CONFIG.verbosity,
+            transferKeywords:
+              typeof conf.transferKeywords === "string"
+                ? conf.transferKeywords
+                : DEFAULT_AGENT_CONFIG.transferKeywords,
+            voiceStability:
+              typeof conf.voiceStability === "number"
+                ? conf.voiceStability
+                : DEFAULT_AGENT_CONFIG.voiceStability,
+            clarityBoost:
+              typeof conf.clarityBoost === "number"
+                ? conf.clarityBoost
+                : DEFAULT_AGENT_CONFIG.clarityBoost,
+            speakingRate:
+              typeof conf.speakingRate === "number"
+                ? conf.speakingRate
+                : DEFAULT_AGENT_CONFIG.speakingRate,
+            ambientNoise:
+              (conf.ambientNoise as AgentConfig["ambientNoise"]) ||
+              DEFAULT_AGENT_CONFIG.ambientNoise,
+            calendarBookingEnabled:
+              typeof conf.calendarBookingEnabled === "boolean"
+                ? conf.calendarBookingEnabled
+                : DEFAULT_AGENT_CONFIG.calendarBookingEnabled,
+            faqKnowledgeEnabled:
+              typeof conf.faqKnowledgeEnabled === "boolean"
+                ? conf.faqKnowledgeEnabled
+                : DEFAULT_AGENT_CONFIG.faqKnowledgeEnabled,
+            callRecordingEnabled:
+              typeof conf.callRecordingEnabled === "boolean"
+                ? conf.callRecordingEnabled
+                : DEFAULT_AGENT_CONFIG.callRecordingEnabled,
+            smsFollowUpEnabled:
+              typeof conf.smsFollowUpEnabled === "boolean"
+                ? conf.smsFollowUpEnabled
+                : DEFAULT_AGENT_CONFIG.smsFollowUpEnabled,
           };
           setConfig(merged);
           setSavedConfig(merged);
@@ -86,6 +157,20 @@ export default function AgentConfigPage() {
           latencyMode: config.latencyMode,
           tone: config.conversationTone,
           interruptible: config.interruptionSensitivity !== "low",
+          configuration: {
+            greetingMessage: config.greetingMessage,
+            selectedTemplateId: config.selectedTemplateId,
+            verbosity: config.verbosity,
+            transferKeywords: config.transferKeywords,
+            voiceStability: config.voiceStability,
+            clarityBoost: config.clarityBoost,
+            speakingRate: config.speakingRate,
+            ambientNoise: config.ambientNoise,
+            calendarBookingEnabled: config.calendarBookingEnabled,
+            faqKnowledgeEnabled: config.faqKnowledgeEnabled,
+            callRecordingEnabled: config.callRecordingEnabled,
+            smsFollowUpEnabled: config.smsFollowUpEnabled,
+          },
         }),
       });
 
