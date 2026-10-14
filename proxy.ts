@@ -23,12 +23,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Landing route
+  // Landing route - allow public visitors to see landing page, authenticated users to /dashboard
   if (pathname === "/") {
     if (sessionToken) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.next();
   }
 
   return NextResponse.next();

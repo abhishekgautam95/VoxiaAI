@@ -31,6 +31,8 @@ const agentConfigSchema = z.object({
   faqKnowledgeEnabled: z.boolean().optional(),
   callRecordingEnabled: z.boolean().optional(),
   smsFollowUpEnabled: z.boolean().optional(),
+  isLive: z.boolean().optional(),
+  isActive: z.boolean().optional(),
 });
 
 export async function GET() {
@@ -93,6 +95,8 @@ export async function PUT(request: Request) {
     ...(body.faqKnowledgeEnabled !== undefined ? { faqKnowledgeEnabled: body.faqKnowledgeEnabled } : {}),
     ...(body.callRecordingEnabled !== undefined ? { callRecordingEnabled: body.callRecordingEnabled } : {}),
     ...(body.smsFollowUpEnabled !== undefined ? { smsFollowUpEnabled: body.smsFollowUpEnabled } : {}),
+    ...(body.isLive !== undefined ? { isLive: body.isLive } : {}),
+    ...(body.isActive !== undefined ? { isLive: body.isActive } : {}),
   };
 
   const coreFields = {
@@ -138,4 +142,65 @@ export async function PUT(request: Request) {
   });
 
   return Response.json({ agent: updatedAgent, message: "Agent successfully deployed and saved!" });
+}
+
+export async function PATCH(request: Request) {
+  const session = await getSession();
+  if (!session) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const existingAgent = await db.agentConfig.findUnique({
+    where: { organizationId: session.organizationId },
+  });
+
+  const existingConfig =
+    existingAgent?.configuration && typeof existingAgent.configuration === "object"
+      ? (existingAgent.configuration as Record<string, unknown>)
+      : {};
+
+  const liveState =
+    typeof body.isLive === "boolean"
+      ? body.isLive
+      : typeof body.isActive === "boolean"
+      ? body.isActive
+      : existingConfig.isLive ?? true;
+
+  const mergedConfig: Record<string, unknown> = {
+    ...existingConfig,
+    isLive: liveState,
+    isActive: liveState,
+  };
+
+  const updatedAgent = await db.agentConfig.upsert({
+    where: { organizationId: session.organizationId },
+    update: {
+      configuration: mergedConfig as Prisma.InputJsonValue,
+    },
+    create: {
+      organizationId: session.organizationId,
+      configuration: mergedConfig as Prisma.InputJsonValue,
+    },
+  });
+
+  await db.auditLog.create({
+    data: {
+      organizationId: session.organizationId,
+      actorUserId: session.userId,
+      action: "AGENT_CONFIG_UPDATED",
+      entityType: "AgentConfig",
+      entityId: updatedAgent.id,
+      metadata: {
+        isLive: liveState,
+        action: liveState ? "AGENT_ACTIVATED" : "AGENT_DEACTIVATED",
+      },
+    },
+  });
+
+  return Response.json({
+    agent: updatedAgent,
+    isLive: liveState,
+    message: liveState ? "Agent is now live and answering calls." : "Agent is currently offline.",
+  });
 }

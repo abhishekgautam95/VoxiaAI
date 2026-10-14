@@ -12,12 +12,14 @@ import {
   CreditCard,
   X,
   Check,
+  Users,
 } from "lucide-react";
 import { AuditLogsView } from "@/components/dashboard/settings/audit-logs-view";
 import { BillingView } from "@/components/dashboard/settings/billing-view";
+import { TeamView } from "@/components/dashboard/settings/team-view";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<"integrations" | "audit" | "billing">("integrations");
+  const [activeTab, setActiveTab] = useState<"integrations" | "audit" | "billing" | "team">("integrations");
   const [twilioSid, setTwilioSid] = useState("AC993817112048f0");
   const [webhookUrl, setWebhookUrl] = useState("https://api.voxia.ai/webhooks/calls/v1");
   const [elevenLabsKey, setElevenLabsKey] = useState("••••••••••••••••••••••••");
@@ -223,9 +225,23 @@ export default function SettingsPage() {
           <CreditCard className="h-4 w-4" />
           <span>Plans, Billing & Quotas</span>
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("team")}
+          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors ${
+            activeTab === "team"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <Users className="h-4 w-4" />
+          <span>Team & Staff Access</span>
+        </button>
       </div>
 
-      {activeTab === "audit" ? (
+      {activeTab === "team" ? (
+        <TeamView />
+      ) : activeTab === "audit" ? (
         <AuditLogsView />
       ) : activeTab === "billing" ? (
         <BillingView />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Building2,
   Bot,
@@ -23,7 +24,8 @@ import { LiveTestWidget } from "@/components/dashboard/agent/live-test-widget";
 
 type ActiveTab = "business" | "prompt" | "voice" | "tools";
 
-export default function AgentConfigPage() {
+function AgentConfigContent() {
+  const searchParams = useSearchParams();
   const [config, setConfig] = useState<AgentConfig>(DEFAULT_AGENT_CONFIG);
   const [savedConfig, setSavedConfig] = useState<AgentConfig>(DEFAULT_AGENT_CONFIG);
   const [activeTab, setActiveTab] = useState<ActiveTab>("business");
@@ -36,6 +38,15 @@ export default function AgentConfigPage() {
     }
     return false;
   });
+
+  useEffect(() => {
+    if (searchParams?.get("testCall") === "true") {
+      const timer = setTimeout(() => {
+        setIsFloatingCallOpen(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   // Load config from database on mount
   useEffect(() => {
@@ -490,5 +501,13 @@ export default function AgentConfigPage() {
         onCloseFloating={() => setIsFloatingCallOpen(false)}
       />
     </div>
+  );
+}
+
+export default function AgentConfigPage() {
+  return (
+    <React.Suspense fallback={<div className="p-6 text-zinc-400">Loading AI Agent Configuration...</div>}>
+      <AgentConfigContent />
+    </React.Suspense>
   );
 }

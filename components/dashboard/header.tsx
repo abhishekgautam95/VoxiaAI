@@ -141,6 +141,20 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         }
       })
       .catch(() => {});
+
+    fetch("/api/agent")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.agent?.configuration && typeof data.agent.configuration === "object") {
+          const conf = data.agent.configuration as Record<string, unknown>;
+          if (typeof conf.isLive === "boolean") {
+            setIsAgentLive(conf.isLive);
+          } else if (typeof conf.isActive === "boolean") {
+            setIsAgentLive(conf.isActive);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleSelectOrg = async (org: Organization) => {
@@ -161,6 +175,20 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
       }
     } catch {
       // ignore
+    }
+  };
+
+  const handleToggleAgentLive = async () => {
+    const nextState = !isAgentLive;
+    setIsAgentLive(nextState);
+    try {
+      await fetch("/api/agent", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isLive: nextState, isActive: nextState }),
+      });
+    } catch {
+      setIsAgentLive(!nextState);
     }
   };
 
@@ -316,7 +344,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         <div className="flex items-center">
           <button
             type="button"
-            onClick={() => setIsAgentLive((prev) => !prev)}
+            onClick={handleToggleAgentLive}
             className={`group relative flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition-all duration-200 ${
               isAgentLive
                 ? "border-emerald-500/30 bg-emerald-950/40 text-emerald-300 hover:bg-emerald-950/60 shadow-sm shadow-emerald-950"
