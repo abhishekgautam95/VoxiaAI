@@ -134,6 +134,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-zinc-800/70 px-5">
           <Link
             href="/dashboard"
+            prefetch={false}
             onClick={onCloseMobile}
             className="group flex items-center gap-3 transition-opacity hover:opacity-90"
           >
@@ -180,6 +181,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={false}
                     onClick={onCloseMobile}
                     className={`group relative flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
                       active
@@ -238,6 +240,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={false}
                     onClick={onCloseMobile}
                     className={`group relative flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
                       active
@@ -325,6 +328,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
             <span>{billingUsage.percentMinutesUsed}% consumed</span>
             <Link
               href="/dashboard/settings"
+              prefetch={false}
               className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
             >
               Upgrade Plan &rarr;
