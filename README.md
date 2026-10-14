@@ -389,9 +389,15 @@ node scripts/seed-billing.mjs
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) and log in with the seeded demo credentials:
+Visit [http://localhost:3000](http://localhost:3000) to view the public SaaS landing page, or log in to the dashboard with:
 - **Email**: `demo.owner@voxia.local`
 - **Password**: `VoxiaDemo!2026`
+
+### 6. Run Unit Tests (Vitest)
+```bash
+npm test
+```
+Executes the comprehensive Vitest test suite covering conflict-free appointment scheduling, inbound 2-way SMS confirmation/reschedule parsing, and telephony `<Dial>` transfers.
 
 ---
 

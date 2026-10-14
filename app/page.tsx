@@ -73,7 +73,7 @@ export default function LandingPage() {
             <a href="#calculator" className="hover:text-cyan-400 transition-colors">ROI Calculator</a>
             <a href="#pricing" className="hover:text-cyan-400 transition-colors">Pricing</a>
             <a
-              href="https://github.com"
+              href="https://github.com/abhishekgautam95/VoxiaAI"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 hover:text-white transition-colors"
@@ -596,7 +596,7 @@ export default function LandingPage() {
                 Workspace Sign In
               </Link>
               <a
-                href="https://github.com"
+                href="https://github.com/abhishekgautam95/VoxiaAI"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-white transition-colors flex items-center gap-1"
