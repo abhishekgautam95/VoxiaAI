@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { AppointmentStatus, Prisma } from "@prisma/client";
 import { dispatchAppointmentWebhook, sendSmsConfirmation } from "@/lib/notifications";
+import { syncAppointmentToDoctorGoogleCalendar } from "@/lib/calendar/google-sync";
 
 const appointmentCreateSchema = z.object({
   customerName: z.string().trim().min(1).max(120),
@@ -15,6 +16,13 @@ const appointmentCreateSchema = z.object({
   notes: z.string().max(1000).optional(),
   bookedBy: z.string().max(80).optional(),
 });
+
+export class SlotConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SlotConflictError";
+  }
+}
 
 export async function GET(request: Request) {
   const session = await getSession();
@@ -67,57 +75,94 @@ export async function POST(request: Request) {
     return Response.json({ error: "Validation failed", details: errorDetails }, { status: 400 });
   }
 
-  // Conflict Avoidance: Verify time slot is not already reserved
-  const existingConflict = await db.appointment.findFirst({
-    where: {
-      organizationId: session.organizationId,
-      date: body.date,
-      time: body.time,
-      status: AppointmentStatus.CONFIRMED,
-    },
-  });
+  let appointment;
+  try {
+    // Atomic Serializable Transaction to prevent concurrent double-booking race conditions
+    appointment = await db.$transaction(
+      async (tx) => {
+        const existingConflict = await tx.appointment.findFirst({
+          where: {
+            organizationId: session.organizationId,
+            date: body.date,
+            time: body.time,
+            status: AppointmentStatus.CONFIRMED,
+          },
+        });
 
-  if (existingConflict) {
-    return Response.json(
-      {
-        error: `Slot ${body.time} on ${body.date} is already reserved for another appointment. Please pick an available time.`,
+        if (existingConflict) {
+          throw new SlotConflictError(
+            `Slot ${body.time} on ${body.date} is already reserved for another appointment. Please pick an available time.`
+          );
+        }
+
+        const created = await tx.appointment.create({
+          data: {
+            organizationId: session.organizationId,
+            customerName: body.customerName,
+            phoneNumber: body.phoneNumber,
+            email: body.email || null,
+            service: body.service,
+            provider: body.provider || "Dr. Sarah Smith",
+            date: body.date,
+            time: body.time,
+            status: AppointmentStatus.CONFIRMED,
+            notes: body.notes || null,
+            bookedBy: body.bookedBy || "Staff Operator",
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            actorUserId: session.userId,
+            action: "APPOINTMENT_CREATED",
+            entityType: "Appointment",
+            entityId: created.id,
+            metadata: {
+              customer: created.customerName,
+              date: created.date,
+              time: created.time,
+            },
+          },
+        });
+
+        return created;
       },
-      { status: 409 }
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      }
     );
+  } catch (err: unknown) {
+    if (err instanceof SlotConflictError) {
+      return Response.json({ error: err.message }, { status: 409 });
+    }
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      (err.code === "P2034" || err.code === "P2002")
+    ) {
+      return Response.json(
+        {
+          error: `Slot ${body.time} on ${body.date} was concurrently reserved. Please select another time.`,
+        },
+        { status: 409 }
+      );
+    }
+    throw err;
   }
 
-  const appointment = await db.appointment.create({
-    data: {
-      organizationId: session.organizationId,
-      customerName: body.customerName,
-      phoneNumber: body.phoneNumber,
-      email: body.email || null,
-      service: body.service,
-      provider: body.provider || "Dr. Sarah Smith",
-      date: body.date,
-      time: body.time,
-      status: AppointmentStatus.CONFIRMED,
-      notes: body.notes || null,
-      bookedBy: body.bookedBy || "Staff Operator",
-    },
-  });
+  // Asynchronously sync to Google Calendar (with 15-minute slot buffer), webhook, and SMS
+  syncAppointmentToDoctorGoogleCalendar(session.organizationId, {
+    appointmentId: appointment.id,
+    customerName: appointment.customerName,
+    phoneNumber: appointment.phoneNumber,
+    email: appointment.email,
+    service: appointment.service,
+    providerName: appointment.provider,
+    date: appointment.date,
+    time: appointment.time,
+    notes: appointment.notes,
+  }).catch(() => {});
 
-  await db.auditLog.create({
-    data: {
-      organizationId: session.organizationId,
-      actorUserId: session.userId,
-      action: "APPOINTMENT_CREATED",
-      entityType: "Appointment",
-      entityId: appointment.id,
-      metadata: {
-        customer: appointment.customerName,
-        date: appointment.date,
-        time: appointment.time,
-      },
-    },
-  });
-
-  // Asynchronously dispatch webhook and SMS confirmations
   dispatchAppointmentWebhook(session.organizationId, {
     id: appointment.id,
     customerName: appointment.customerName,
@@ -138,5 +183,8 @@ export async function POST(request: Request) {
     provider: appointment.provider,
   }).catch(() => {});
 
-  return Response.json({ appointment, message: "Appointment confirmed successfully!" }, { status: 201 });
+  return Response.json(
+    { appointment, message: "Appointment confirmed successfully!" },
+    { status: 201 }
+  );
 }

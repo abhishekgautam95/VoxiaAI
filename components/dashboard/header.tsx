@@ -108,6 +108,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
   // Session & Org state
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
   const [currentOrg, setCurrentOrg] = useState<{ id: string; name: string; slug: string } | null>(null);
+  const [orgList, setOrgList] = useState<Organization[]>(mockOrganizations);
   const [selectedOrg, setSelectedOrg] = useState<Organization>(mockOrganizations[0]);
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
   const orgDropdownRef = useRef<HTMLDivElement>(null);
@@ -132,12 +133,25 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         if (data?.user && data?.organization) {
           setCurrentUser(data.user);
           setCurrentOrg(data.organization);
-          setSelectedOrg({
+          const activeOrgItem: Organization = {
             id: data.organization.id,
             name: data.organization.name,
-            plan: "Enterprise",
+            plan: data.role || "Enterprise",
             phone: "+1 (415) 800-4291",
-          });
+          };
+          setSelectedOrg(activeOrgItem);
+
+          if (Array.isArray(data.organizations) && data.organizations.length > 0) {
+            const memberOrgs: Organization[] = data.organizations.map(
+              (o: { id: string; name: string; role?: string }) => ({
+                id: o.id,
+                name: o.name,
+                plan: o.role || "Member",
+                phone: "+1 (415) 800-4291",
+              })
+            );
+            setOrgList(memberOrgs);
+          }
         }
       })
       .catch(() => {});
@@ -160,15 +174,16 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
   const handleSelectOrg = async (org: Organization) => {
     setSelectedOrg(org);
     setIsOrgDropdownOpen(false);
+    const isPresetNew = org.id.startsWith("org-");
     try {
       const res = await fetch("/api/auth/switch-org", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          organizationId: org.id,
-          name: org.name,
-          phone: org.phone,
-        }),
+        body: JSON.stringify(
+          isPresetNew
+            ? { action: "CREATE", name: org.name, phone: org.phone }
+            : { action: "SWITCH", organizationId: org.id }
+        ),
       });
       if (res.ok) {
         window.location.reload();
@@ -287,8 +302,8 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
               </div>
 
               <div className="space-y-1">
-                {mockOrganizations.map((org) => {
-                  const isSelected = org.id === selectedOrg.id;
+                {orgList.map((org) => {
+                  const isSelected = org.id === selectedOrg.id || org.id === currentOrg?.id;
                   return (
                     <button
                       key={org.id}

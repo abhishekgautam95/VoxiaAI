@@ -12,6 +12,13 @@ export interface AppointmentNotificationData {
   organizationName?: string;
 }
 
+export interface SmsDeliveryResult {
+  sent: boolean;
+  simulated: boolean;
+  deliveryStatus: "DELIVERED" | "UNCONFIGURED" | "FAILED";
+  message: string;
+}
+
 export async function dispatchAppointmentWebhook(
   organizationId: string,
   appointment: AppointmentNotificationData
@@ -33,8 +40,7 @@ export async function dispatchAppointmentWebhook(
       return false;
     }
 
-    // Fire webhook asynchronously
-    fetch(webhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,9 +52,9 @@ export async function dispatchAppointmentWebhook(
         organizationId,
         data: appointment,
       }),
-    }).catch(() => {});
+    });
 
-    return true;
+    return res.ok;
   } catch {
     return false;
   }
@@ -57,7 +63,7 @@ export async function dispatchAppointmentWebhook(
 export async function sendSmsConfirmation(
   organizationId: string,
   appointment: AppointmentNotificationData
-): Promise<{ sent: boolean; message: string }> {
+): Promise<SmsDeliveryResult> {
   try {
     const org = await db.organization.findUnique({
       where: { id: organizationId },
@@ -81,33 +87,54 @@ export async function sendSmsConfirmation(
     const authToken = (config.authToken as string) || process.env.TWILIO_AUTH_TOKEN;
     const fromNumber = (config.fromNumber as string) || process.env.TWILIO_PHONE_NUMBER;
 
-    if (accountSid && authToken && fromNumber) {
-      const basicAuth = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
-      const form = new URLSearchParams();
-      form.append("From", fromNumber);
-      form.append("To", appointment.phoneNumber);
-      form.append("Body", body);
-
-      const twilioRes = await fetch(
-        `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Basic ${basicAuth}`,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: form.toString(),
-        }
-      );
-
-      if (twilioRes.ok) {
-        return { sent: true, message: body };
-      }
+    if (!accountSid || !authToken || !fromNumber) {
+      return {
+        sent: false,
+        simulated: true,
+        deliveryStatus: "UNCONFIGURED",
+        message: body,
+      };
     }
 
-    // Return simulated dispatch response when no live Twilio credentials configured
-    return { sent: true, message: body };
+    const basicAuth = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+    const form = new URLSearchParams();
+    form.append("From", fromNumber);
+    form.append("To", appointment.phoneNumber);
+    form.append("Body", body);
+
+    const twilioRes = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${basicAuth}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: form.toString(),
+      }
+    );
+
+    if (twilioRes.ok) {
+      return {
+        sent: true,
+        simulated: false,
+        deliveryStatus: "DELIVERED",
+        message: body,
+      };
+    }
+
+    return {
+      sent: false,
+      simulated: false,
+      deliveryStatus: "FAILED",
+      message: `Twilio SMS dispatch failed with HTTP ${twilioRes.status}`,
+    };
   } catch {
-    return { sent: false, message: "Failed to dispatch SMS" };
+    return {
+      sent: false,
+      simulated: false,
+      deliveryStatus: "FAILED",
+      message: "Failed to dispatch SMS",
+    };
   }
 }

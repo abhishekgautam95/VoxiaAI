@@ -1,12 +1,15 @@
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { MembershipRole } from "@prisma/client";
+import { randomBytes } from "crypto";
 import { z } from "zod";
 
 const switchOrgSchema = z.object({
-  organizationId: z.string().optional(),
-  slug: z.string().optional(),
-  name: z.string().optional(),
-  phone: z.string().optional(),
+  action: z.enum(["SWITCH", "CREATE"]).default("SWITCH"),
+  organizationId: z.string().trim().min(1).optional(),
+  slug: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(2).max(120).optional(),
+  phone: z.string().trim().max(30).optional(),
 });
 
 export async function POST(request: Request) {
@@ -18,101 +21,141 @@ export async function POST(request: Request) {
   let body: z.infer<typeof switchOrgSchema>;
   try {
     body = switchOrgSchema.parse(await request.json());
-  } catch {
-    return Response.json({ error: "Invalid payload" }, { status: 400 });
+  } catch (err: unknown) {
+    const details = err instanceof z.ZodError ? err.flatten() : "Invalid payload";
+    return Response.json({ error: "Invalid payload", details }, { status: 400 });
   }
 
-  let targetOrg = null;
+  // =========================================================================
+  // FLOW 1: OWNER-ONLY ORGANIZATION CREATION
+  // =========================================================================
+  if (body.action === "CREATE") {
+    if (session.role !== MembershipRole.OWNER) {
+      return Response.json(
+        { error: "Forbidden: Only an organization OWNER can create a new practice workspace." },
+        { status: 403 }
+      );
+    }
 
-  if (body.organizationId && !body.organizationId.startsWith("org-")) {
-    targetOrg = await db.organization.findUnique({
-      where: { id: body.organizationId },
-    });
-  }
+    if (!body.name) {
+      return Response.json({ error: "Practice name is required to create an organization" }, { status: 400 });
+    }
 
-  if (!targetOrg && body.slug) {
-    targetOrg = await db.organization.findUnique({
-      where: { slug: body.slug },
-    });
-  }
-
-  // If still not found, search by name
-  if (!targetOrg && body.name) {
-    targetOrg = await db.organization.findFirst({
-      where: { name: { equals: body.name, mode: "insensitive" } },
-    });
-  }
-
-  // If organization does not exist yet (e.g. Metro Urgent Care or Harbor View Law Group from preset menu), create and seed it
-  if (!targetOrg) {
-    const orgName = body.name || "Specialty Practice Group";
-    const generatedSlug = (
+    const baseSlug = (
       body.slug ||
-      orgName
+      body.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "")
-    );
+    ).slice(0, 48);
 
-    targetOrg = await db.organization.upsert({
-      where: { slug: generatedSlug },
-      update: {},
-      create: {
-        name: orgName,
-        slug: generatedSlug,
-        timezone: "America/Los_Angeles",
-      },
+    const existingWithSlug = await db.organization.findUnique({ where: { slug: baseSlug } });
+    const uniqueSlug = existingWithSlug
+      ? `${baseSlug}-${randomBytes(3).toString("hex")}`
+      : baseSlug;
+
+    const createdOrg = await db.$transaction(async (tx) => {
+      const org = await tx.organization.create({
+        data: {
+          name: body.name!,
+          slug: uniqueSlug,
+          timezone: "America/Los_Angeles",
+        },
+      });
+
+      await tx.membership.create({
+        data: {
+          userId: session.userId,
+          organizationId: org.id,
+          role: MembershipRole.OWNER,
+        },
+      });
+
+      await tx.agentConfig.create({
+        data: {
+          organizationId: org.id,
+          businessName: org.name,
+          businessType: "Medical Practice",
+          phoneNumber: body.phone || "+1 (415) 800-4291",
+          displayName: "Sarah (AI Receptionist)",
+        },
+      });
+
+      return org;
     });
 
-    // Create default agent config for the newly created organization
-    await db.agentConfig.upsert({
-      where: { organizationId: targetOrg.id },
-      update: {},
-      create: {
-        organizationId: targetOrg.id,
-        businessName: targetOrg.name,
-        businessType: "Medical Practice",
-        phoneNumber: body.phone || "+1 (415) 800-4291",
-        displayName: "Sarah (AI Receptionist)",
-      },
+    await db.session.update({
+      where: { id: session.id },
+      data: { organizationId: createdOrg.id },
     });
 
-    // Provision a default demo phone line
-    const defaultNumber = body.phone || `+1 (415) 800-${Math.floor(1000 + Math.random() * 9000)}`;
-    await db.phoneNumber.upsert({
-      where: {
-        organizationId_number: {
-          organizationId: targetOrg.id,
-          number: defaultNumber,
+    await db.auditLog.create({
+      data: {
+        organizationId: createdOrg.id,
+        actorUserId: session.userId,
+        action: "AUTHENTICATED",
+        entityType: "OrganizationCreated",
+        entityId: createdOrg.id,
+        metadata: {
+          organizationName: createdOrg.name,
+          slug: createdOrg.slug,
         },
       },
-      update: {},
-      create: {
-        organizationId: targetOrg.id,
-        number: defaultNumber,
-        label: `${targetOrg.name} Reception Line`,
-        status: "ACTIVE",
-      },
     });
+
+    return Response.json(
+      {
+        success: true,
+        message: `Created and switched to ${createdOrg.name}`,
+        organization: {
+          id: createdOrg.id,
+          name: createdOrg.name,
+          slug: createdOrg.slug,
+          role: MembershipRole.OWNER,
+        },
+      },
+      { status: 201 }
+    );
   }
 
-  // Ensure current user has a Membership in this organization
-  await db.membership.upsert({
+  // =========================================================================
+  // FLOW 2: SWITCH TO AN EXISTING ORGANIZATION (REQUIRES EXISTING MEMBERSHIP)
+  // =========================================================================
+  if (!body.organizationId && !body.slug) {
+    return Response.json(
+      { error: "Specify organizationId or slug to switch organizations" },
+      { status: 400 }
+    );
+  }
+
+  const targetOrg = await db.organization.findFirst({
+    where: {
+      ...(body.organizationId ? { id: body.organizationId } : {}),
+      ...(!body.organizationId && body.slug ? { slug: body.slug } : {}),
+    },
+  });
+
+  if (!targetOrg) {
+    return Response.json({ error: "Organization not found" }, { status: 404 });
+  }
+
+  // Verify the logged-in user already holds a valid Membership in targetOrg
+  const existingMembership = await db.membership.findUnique({
     where: {
       organizationId_userId: {
         organizationId: targetOrg.id,
         userId: session.userId,
       },
     },
-    update: {},
-    create: {
-      userId: session.userId,
-      organizationId: targetOrg.id,
-      role: "OWNER",
-    },
   });
 
-  // Switch the active organization on the user's Session
+  if (!existingMembership) {
+    return Response.json(
+      { error: "Forbidden: You are not a member of the requested organization." },
+      { status: 403 }
+    );
+  }
+
   await db.session.update({
     where: { id: session.id },
     data: { organizationId: targetOrg.id },
@@ -129,6 +172,7 @@ export async function POST(request: Request) {
         previousOrganizationId: session.organizationId,
         newOrganizationId: targetOrg.id,
         organizationName: targetOrg.name,
+        role: existingMembership.role,
       },
     },
   });
@@ -140,6 +184,7 @@ export async function POST(request: Request) {
       id: targetOrg.id,
       name: targetOrg.name,
       slug: targetOrg.slug,
+      role: existingMembership.role,
     },
   });
 }

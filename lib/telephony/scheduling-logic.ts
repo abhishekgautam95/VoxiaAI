@@ -169,16 +169,30 @@ export function isEscalationRequested(
 }
 
 /**
- * Builds valid TwiML XML to dial and transfer caller to human staff.
+ * Builds valid TwiML XML to dial and transfer caller to human staff with XML escaping and E.164 validation.
  */
 export function buildTransferTwiml(
   destinationPhone: string,
   announcement = "Please hold while I transfer you to our front desk staff."
 ): string {
-  const cleanPhone = destinationPhone.trim();
+  const digits = destinationPhone.replace(/\D/g, "");
+  const e164 =
+    digits.length === 10
+      ? `+1${digits}`
+      : digits.length >= 11 && digits.length <= 15
+      ? `+${digits}`
+      : "+14158004291";
+
+  const safeAnnouncement = String(announcement)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Joanna-Neural">${announcement}</Say>
-  <Dial>${cleanPhone}</Dial>
+  <Say voice="Polly.Joanna-Neural">${safeAnnouncement}</Say>
+  <Dial>${e164}</Dial>
 </Response>`.trim();
 }

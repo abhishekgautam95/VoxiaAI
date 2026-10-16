@@ -1,7 +1,8 @@
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { AppointmentStatus, AuditAction } from "@prisma/client";
+import { AppointmentStatus, AuditAction, Prisma } from "@prisma/client";
+import { SlotConflictError } from "../route";
 
 const updateSchema = z.object({
   status: z.enum(["CONFIRMED", "COMPLETED", "CANCELLED", "PENDING"]).optional(),
@@ -30,88 +31,104 @@ export async function PATCH(
     return Response.json({ error: "Validation failed", details: errorDetails }, { status: 400 });
   }
 
-  const existing = await db.appointment.findFirst({
-    where: { id, organizationId: session.organizationId },
-  });
+  try {
+    const updatedAppointment = await db.$transaction(
+      async (tx) => {
+        const existing = await tx.appointment.findFirst({
+          where: { id, organizationId: session.organizationId },
+        });
 
-  if (!existing) {
-    return Response.json({ error: "Appointment not found" }, { status: 404 });
-  }
+        if (!existing) {
+          return null;
+        }
 
-  if (body.date || body.time) {
-    const targetDate = body.date || existing.date;
-    const targetTime = body.time || existing.time;
-    const conflict = await db.appointment.findFirst({
-      where: {
-        organizationId: session.organizationId,
-        id: { not: id },
-        date: targetDate,
-        time: targetTime,
-        status: AppointmentStatus.CONFIRMED,
+        const targetDate = body.date || existing.date;
+        const targetTime = body.time || existing.time;
+        const targetStatus = (body.status as AppointmentStatus) || existing.status;
+
+        if ((body.date || body.time || body.status === "CONFIRMED") && targetStatus === AppointmentStatus.CONFIRMED) {
+          const conflict = await tx.appointment.findFirst({
+            where: {
+              organizationId: session.organizationId,
+              id: { not: id },
+              date: targetDate,
+              time: targetTime,
+              status: AppointmentStatus.CONFIRMED,
+            },
+          });
+
+          if (conflict) {
+            throw new SlotConflictError(
+              `Cannot reschedule: Slot ${targetTime} on ${targetDate} is already reserved for another appointment.`
+            );
+          }
+        }
+
+        const updated = await tx.appointment.update({
+          where: { id },
+          data: {
+            ...(body.status ? { status: body.status as AppointmentStatus } : {}),
+            ...(body.date ? { date: body.date } : {}),
+            ...(body.time ? { time: body.time } : {}),
+            ...(body.notes !== undefined ? { notes: body.notes } : {}),
+          },
+        });
+
+        let auditAction: AuditAction = AuditAction.APPOINTMENT_UPDATED;
+        if (body.status === "CANCELLED") {
+          auditAction = AuditAction.APPOINTMENT_CANCELLED;
+        } else if (body.date || body.time) {
+          auditAction = AuditAction.APPOINTMENT_RESCHEDULED;
+        }
+
+        await tx.auditLog.create({
+          data: {
+            organizationId: session.organizationId,
+            actorUserId: session.userId,
+            action: auditAction,
+            entityType: "Appointment",
+            entityId: id,
+            metadata: {
+              previousDate: existing.date,
+              previousTime: existing.time,
+              newDate: updated.date,
+              newTime: updated.time,
+              status: updated.status,
+              reason: body.reason,
+            },
+          },
+        });
+
+        return updated;
       },
-    });
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      }
+    );
 
-    if (conflict) {
+    if (!updatedAppointment) {
+      return Response.json({ error: "Appointment not found" }, { status: 404 });
+    }
+
+    return Response.json({
+      appointment: updatedAppointment,
+      message: "Appointment updated successfully!",
+    });
+  } catch (err: unknown) {
+    if (err instanceof SlotConflictError) {
+      return Response.json({ error: err.message }, { status: 409 });
+    }
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      (err.code === "P2034" || err.code === "P2002")
+    ) {
       return Response.json(
-        {
-          error: `Cannot reschedule: Slot ${targetTime} on ${targetDate} is already reserved for another appointment.`,
-        },
+        { error: "Slot conflict detected during concurrent reschedule. Please pick another time." },
         { status: 409 }
       );
     }
+    throw err;
   }
-
-  const updateData: {
-    status?: AppointmentStatus;
-    date?: string;
-    time?: string;
-    notes?: string;
-  } = {};
-
-  if (body.status) {
-    updateData.status = body.status as AppointmentStatus;
-  }
-  if (body.date) {
-    updateData.date = body.date;
-  }
-  if (body.time) {
-    updateData.time = body.time;
-  }
-  if (body.notes !== undefined) {
-    updateData.notes = body.notes;
-  }
-
-  const updatedAppointment = await db.appointment.update({
-    where: { id },
-    data: updateData,
-  });
-
-  let auditAction: AuditAction = AuditAction.APPOINTMENT_UPDATED;
-  if (body.status === "CANCELLED") {
-    auditAction = AuditAction.APPOINTMENT_CANCELLED;
-  } else if (body.date || body.time) {
-    auditAction = AuditAction.APPOINTMENT_RESCHEDULED;
-  }
-
-  await db.auditLog.create({
-    data: {
-      organizationId: session.organizationId,
-      actorUserId: session.userId,
-      action: auditAction,
-      entityType: "Appointment",
-      entityId: id,
-      metadata: {
-        previousDate: existing.date,
-        previousTime: existing.time,
-        newDate: updatedAppointment.date,
-        newTime: updatedAppointment.time,
-        status: updatedAppointment.status,
-        reason: body.reason,
-      },
-    },
-  });
-
-  return Response.json({ appointment: updatedAppointment, message: "Appointment updated successfully!" });
 }
 
 export async function DELETE(

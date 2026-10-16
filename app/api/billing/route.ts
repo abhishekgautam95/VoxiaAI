@@ -1,59 +1,14 @@
-import { getSession } from "@/lib/auth/session";
+import { getSession, canManageTeamAndSettings } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { recordAuditLog } from "@/lib/audit";
+import { TIER_CATALOG, stripeRequest } from "@/lib/stripe";
 import { SubscriptionTier, SubscriptionStatus } from "@prisma/client";
 import { z } from "zod";
 
-const TIERS = [
-  {
-    id: "STARTER",
-    name: "Clinic Starter",
-    priceMonthly: 199,
-    includedMinutes: 400,
-    includedNumbers: 1,
-    description: "Ideal for solo practitioners and boutique clinics.",
-    features: [
-      "1 Dedicated Carrier Line",
-      "400 Minutes Monthly Answering",
-      "Google Calendar 2-Way Sync",
-      "Standard Voice Synthesis",
-      "Email & Webhook Alerts",
-    ],
-  },
-  {
-    id: "PRO",
-    name: "Practice Pro",
-    priceMonthly: 499,
-    includedMinutes: 1000,
-    includedNumbers: 3,
-    description: "The complete autonomous front desk for busy healthcare practices.",
-    features: [
-      "3 Dedicated Carrier Lines",
-      "1,000 Minutes Monthly Answering",
-      "RAG Clinic Knowledge Base (Unlimited FAQs)",
-      "Conflict-Free Multi-Doctor Scheduling",
-      "ElevenLabs Turbo v2.5 Voice Synthesis",
-      "Instant Post-Call SMS Confirmations",
-      "HIPAA Compliance Audit Trail",
-    ],
-  },
-  {
-    id: "ENTERPRISE",
-    name: "Multi-Location Enterprise",
-    priceMonthly: 999,
-    includedMinutes: 3000,
-    includedNumbers: 10,
-    description: "High-volume call center and hospital group voice orchestration.",
-    features: [
-      "10 Dedicated Toll-Free & Local Lines",
-      "3,000 Minutes Monthly Answering",
-      "Custom Voice Cloning & Localization",
-      "Custom EHR/EMR Integration",
-      "Signed HIPAA BAA Agreement",
-      "Dedicated 24/7 Priority Telecom SLA",
-    ],
-  },
-];
+const updateTierSchema = z.object({
+  tier: z.enum(["STARTER", "PRO", "ENTERPRISE"]).optional(),
+  action: z.enum(["CHECKOUT", "PORTAL"]).default("CHECKOUT"),
+});
 
 export async function GET() {
   const session = await getSession();
@@ -100,32 +55,35 @@ export async function GET() {
     }),
   ]);
 
-  const realMinutesFromDb = Math.round((callDurationSum._sum.durationSeconds || 0) / 60);
-  const totalUsedMinutes = Math.max(subscription.usedMinutes, realMinutesFromDb);
+  const actualCallMinutes = Math.ceil(
+    (callDurationSum._sum.durationSeconds || 0) / 60
+  );
+  const usedMinutes = Math.max(subscription.usedMinutes, actualCallMinutes);
 
   const percentMinutesUsed = Math.min(
-    Math.round((totalUsedMinutes / subscription.includedMinutes) * 100),
-    100
+    100,
+    Math.round((usedMinutes / Math.max(1, subscription.includedMinutes)) * 100)
   );
 
   return Response.json({
-    subscription,
-    invoices,
+    subscription: {
+      ...subscription,
+      usedMinutes,
+      activeNumbers: phoneCount,
+    },
     usage: {
-      usedMinutes: totalUsedMinutes,
+      usedMinutes,
       includedMinutes: subscription.includedMinutes,
       percentMinutesUsed,
       activeNumbers: phoneCount,
       includedNumbers: subscription.includedNumbers,
       extraMinuteRate: subscription.extraMinuteRate,
     },
-    tiers: TIERS,
+    invoices,
+    tiers: Object.values(TIER_CATALOG),
+    stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
   });
 }
-
-const upgradeSchema = z.object({
-  tier: z.enum(["STARTER", "PRO", "ENTERPRISE"]),
-});
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -133,19 +91,99 @@ export async function POST(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: z.infer<typeof upgradeSchema>;
+  if (!canManageTeamAndSettings(session.role)) {
+    return Response.json(
+      { error: "Forbidden: Only practice Owners or Admins can modify billing plans." },
+      { status: 403 }
+    );
+  }
+
+  let body: z.infer<typeof updateTierSchema>;
   try {
-    body = upgradeSchema.parse(await request.json());
+    body = updateTierSchema.parse(await request.json());
   } catch (err: unknown) {
     const errorDetails = err instanceof z.ZodError ? err.flatten() : "Invalid tier payload";
     return Response.json({ error: "Validation failed", details: errorDetails }, { status: 400 });
   }
 
-  const targetTierConfig = TIERS.find((t) => t.id === body.tier);
+  const targetTierKey = (body.tier || "PRO") as SubscriptionTier;
+  const targetTierConfig = TIER_CATALOG[targetTierKey];
   if (!targetTierConfig) {
     return Response.json({ error: "Selected tier not found" }, { status: 400 });
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  // Live Stripe Checkout / Customer Portal flow when STRIPE_SECRET_KEY is configured
+  if (process.env.STRIPE_SECRET_KEY) {
+    const org = await db.organization.findUnique({
+      where: { id: session.organizationId },
+      include: { subscription: true },
+    });
+
+    if (!org) {
+      return Response.json({ error: "Organization not found" }, { status: 404 });
+    }
+
+    let stripeCustomerId = org.subscription?.stripeCustomerId;
+
+    if (!stripeCustomerId) {
+      const customer = await stripeRequest<{ id: string }>("/customers", {
+        email: session.user.email,
+        name: org.name,
+        "metadata[organizationId]": org.id,
+        "metadata[organizationSlug]": org.slug,
+      });
+      stripeCustomerId = customer.id;
+
+      await db.subscription.upsert({
+        where: { organizationId: org.id },
+        create: {
+          organizationId: org.id,
+          stripeCustomerId,
+          tier: SubscriptionTier.PRO,
+          status: SubscriptionStatus.TRIALING,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(Date.now() + 14 * 86400 * 1000),
+        },
+        update: { stripeCustomerId },
+      });
+    }
+
+    if (body.action === "PORTAL") {
+      const portalSession = await stripeRequest<{ url: string }>("/billing_portal/sessions", {
+        customer: stripeCustomerId,
+        return_url: `${appUrl}/dashboard/settings?tab=billing`,
+      });
+      return Response.json({ checkoutUrl: portalSession.url });
+    }
+
+    const checkoutSession = await stripeRequest<{ id: string; url: string }>(
+      "/checkout/sessions",
+      {
+        customer: stripeCustomerId,
+        mode: "subscription",
+        billing_address_collection: "required",
+        "line_items[0][price]": targetTierConfig.stripePriceId,
+        "line_items[0][quantity]": "1",
+        "metadata[organizationId]": org.id,
+        "metadata[tier]": targetTierConfig.id,
+        "metadata[actorUserId]": session.userId,
+        "subscription_data[metadata][organizationId]": org.id,
+        "subscription_data[metadata][tier]": targetTierConfig.id,
+        success_url: `${appUrl}/dashboard/settings?tab=billing&checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/dashboard/settings?tab=billing&checkout=canceled`,
+      }
+    );
+
+    return Response.json({
+      checkoutUrl: checkoutSession.url,
+      sessionId: checkoutSession.id,
+      message: `Redirecting to Stripe Checkout for ${targetTierConfig.name}...`,
+    });
+  }
+
+  // Sandbox / Local Dev Fallback when STRIPE_SECRET_KEY is not set
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -154,17 +192,19 @@ export async function POST(request: Request) {
     where: { organizationId: session.organizationId },
     create: {
       organizationId: session.organizationId,
-      tier: body.tier as SubscriptionTier,
+      tier: targetTierConfig.id,
       status: SubscriptionStatus.ACTIVE,
       includedMinutes: targetTierConfig.includedMinutes,
       includedNumbers: targetTierConfig.includedNumbers,
+      extraMinuteRate: targetTierConfig.extraMinuteRate,
       currentPeriodStart: periodStart,
       currentPeriodEnd: periodEnd,
     },
     update: {
-      tier: body.tier as SubscriptionTier,
+      tier: targetTierConfig.id,
       includedMinutes: targetTierConfig.includedMinutes,
       includedNumbers: targetTierConfig.includedNumbers,
+      extraMinuteRate: targetTierConfig.extraMinuteRate,
       status: SubscriptionStatus.ACTIVE,
     },
   });
@@ -190,7 +230,7 @@ export async function POST(request: Request) {
     entityType: "Subscription",
     entityId: updatedSub.id,
     metadata: {
-      newTier: body.tier,
+      newTier: targetTierConfig.id,
       priceMonthly: targetTierConfig.priceMonthly,
       includedMinutes: targetTierConfig.includedMinutes,
       invoiceNumber,

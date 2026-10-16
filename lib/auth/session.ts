@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
+import { MembershipRole } from "@prisma/client";
 
 const SESSION_COOKIE = "voxia_session";
 const DEFAULT_SESSION_TTL_DAYS = 14;
@@ -24,6 +25,21 @@ function sessionCookieOptions(expiresAt: Date) {
     path: "/",
     expires: expiresAt,
   };
+}
+
+export function canManageTeamAndSettings(role: MembershipRole): boolean {
+  return role === MembershipRole.OWNER || role === MembershipRole.ADMIN;
+}
+
+export function canAssignRole(actorRole: MembershipRole, targetRole: MembershipRole): boolean {
+  if (actorRole === MembershipRole.OWNER) {
+    return true;
+  }
+  if (actorRole === MembershipRole.ADMIN) {
+    // Admins cannot grant OWNER privileges (prevents privilege escalation)
+    return targetRole !== MembershipRole.OWNER;
+  }
+  return false;
 }
 
 export async function createSession(userId: string, organizationId: string) {
@@ -61,12 +77,33 @@ export async function getSession() {
   if (!session) return null;
 
   if (session.expiresAt <= new Date()) {
-    await db.session.delete({ where: { id: session.id } });
+    await db.session.delete({ where: { id: session.id } }).catch(() => {});
     cookieStore.delete(SESSION_COOKIE);
     return null;
   }
 
-  return session;
+  // Verify the active organization membership still exists
+  const membership = await db.membership.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId: session.organizationId,
+        userId: session.userId,
+      },
+    },
+    select: { id: true, role: true },
+  });
+
+  if (!membership) {
+    // Stale or revoked membership -> invalidate session immediately
+    await db.session.delete({ where: { id: session.id } }).catch(() => {});
+    cookieStore.delete(SESSION_COOKIE);
+    return null;
+  }
+
+  return {
+    ...session,
+    role: membership.role,
+  };
 }
 
 export async function destroySession() {

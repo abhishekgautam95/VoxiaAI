@@ -1,48 +1,109 @@
 import { db } from "@/lib/db";
-import { AppointmentStatus } from "@prisma/client";
+import { AppointmentStatus, IntegrationProvider } from "@prisma/client";
 import { recordAuditLog } from "@/lib/audit";
+import {
+  escapeXml,
+  extractLast10Digits,
+  verifyTwilioSignature,
+} from "@/lib/telephony/security";
 
 export async function POST(request: Request) {
+  const rawParams: Record<string, string> = {};
   let fromNumber = "";
+  let toNumber = "";
   let bodyText = "";
 
   try {
     const contentType = request.headers.get("content-type") || "";
     if (contentType.includes("application/x-www-form-urlencoded")) {
       const formData = await request.formData();
-      fromNumber = (formData.get("From") as string) || "";
-      bodyText = (formData.get("Body") as string) || "";
+      formData.forEach((value, key) => {
+        if (typeof value === "string") rawParams[key] = value;
+      });
+      fromNumber = rawParams.From || "";
+      toNumber = rawParams.To || "";
+      bodyText = rawParams.Body || "";
     } else if (contentType.includes("application/json")) {
       const json = await request.json();
-      fromNumber = json.From || "";
-      bodyText = json.Body || "";
+      for (const [k, v] of Object.entries(json || {})) {
+        if (typeof v === "string") rawParams[k] = v;
+      }
+      fromNumber = rawParams.From || "";
+      toNumber = rawParams.To || "";
+      bodyText = rawParams.Body || "";
     }
   } catch {
-    // fallback
+    return Response.json({ error: "Invalid SMS payload" }, { status: 400 });
   }
 
   fromNumber = fromNumber.trim();
-  const cleanDigits = fromNumber.replace(/\D/g, "");
-  const last10 = cleanDigits.slice(-10);
+  toNumber = toNumber.trim();
 
-  // Search for the latest appointment associated with this caller's phone number
-  const appointment = await db.appointment.findFirst({
+  if (!fromNumber || !toNumber) {
+    return Response.json(
+      { error: "Missing required SMS routing parameters (From, To)" },
+      { status: 400 }
+    );
+  }
+
+  // 1. Resolve target organization strictly from the verified destination number (`To`)
+  const toLast10 = extractLast10Digits(toNumber);
+  const matchedPhone = await db.phoneNumber.findFirst({
     where: {
+      status: "ACTIVE",
       OR: [
-        { phoneNumber: fromNumber },
-        ...(last10.length >= 7 ? [{ phoneNumber: { contains: last10 } }] : []),
+        { number: toNumber },
+        ...(toLast10.length === 10 ? [{ number: { contains: toLast10 } }] : []),
       ],
     },
-    orderBy: { createdAt: "desc" },
     include: { organization: true },
   });
 
-  const org =
-    appointment?.organization ||
-    (await db.organization.findFirst({ where: { slug: "apex-health-dental" } })) ||
-    (await db.organization.findFirst());
+  if (!matchedPhone?.organization) {
+    const unmappedTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>This number is not currently linked to an active clinic scheduling line.</Message>
+</Response>`;
+    return new Response(unmappedTwiml, {
+      status: 200,
+      headers: { "Content-Type": "text/xml" },
+    });
+  }
 
-  const orgName = org?.name || "Apex Health & Dental";
+  const org = matchedPhone.organization;
+
+  // 2. Verify X-Twilio-Signature
+  const twilioIntegration = await db.integrationConfig.findUnique({
+    where: {
+      organizationId_provider: {
+        organizationId: org.id,
+        provider: IntegrationProvider.TWILIO,
+      },
+    },
+  });
+  const orgAuthToken = (twilioIntegration?.config as Record<string, unknown> | null)?.authToken as
+    | string
+    | undefined;
+
+  const sigCheck = verifyTwilioSignature(request, rawParams, orgAuthToken);
+  if (!sigCheck.valid) {
+    return Response.json({ error: sigCheck.reason || "Invalid Twilio signature" }, { status: 403 });
+  }
+
+  // 3. Scope appointment lookup strictly to `organizationId: org.id` and caller's phone number
+  const fromLast10 = extractLast10Digits(fromNumber);
+  const appointment = await db.appointment.findFirst({
+    where: {
+      organizationId: org.id,
+      OR: [
+        { phoneNumber: fromNumber },
+        ...(fromLast10.length === 10 ? [{ phoneNumber: { contains: fromLast10 } }] : []),
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const orgName = org.name;
   const upperBody = bodyText.trim().toUpperCase();
 
   let messageReply = "";
@@ -63,13 +124,14 @@ export async function POST(request: Request) {
       });
 
       recordAuditLog({
-        organizationId: appointment.organizationId,
+        organizationId: org.id,
         action: "APPOINTMENT_UPDATED",
         entityType: "Appointment",
         entityId: appointment.id,
         metadata: {
           action: "SMS_CONFIRMATION",
           from: fromNumber,
+          to: toNumber,
           smsBody: bodyText,
         },
       }).catch(() => {});
@@ -89,13 +151,14 @@ export async function POST(request: Request) {
       });
 
       recordAuditLog({
-        organizationId: appointment.organizationId,
+        organizationId: org.id,
         action: "APPOINTMENT_UPDATED",
         entityType: "Appointment",
         entityId: appointment.id,
         metadata: {
           action: "SMS_RESCHEDULE_REQUEST",
           from: fromNumber,
+          to: toNumber,
           smsBody: bodyText,
         },
       }).catch(() => {});
@@ -111,13 +174,14 @@ export async function POST(request: Request) {
       });
 
       recordAuditLog({
-        organizationId: appointment.organizationId,
+        organizationId: org.id,
         action: "APPOINTMENT_CANCELLED",
         entityType: "Appointment",
         entityId: appointment.id,
         metadata: {
           action: "SMS_CANCELLATION",
           from: fromNumber,
+          to: toNumber,
           smsBody: bodyText,
         },
       }).catch(() => {});
@@ -132,7 +196,7 @@ export async function POST(request: Request) {
 
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Message>${messageReply}</Message>
+  <Message>${escapeXml(messageReply)}</Message>
 </Response>`;
 
   return new Response(twiml, {

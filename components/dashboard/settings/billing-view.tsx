@@ -93,11 +93,18 @@ export function BillingView() {
       });
       const data = await res.json();
       if (res.ok) {
+        if (data.checkoutUrl) {
+          window.location.assign(data.checkoutUrl);
+          return;
+        }
         if (data.subscription) setSubscription(data.subscription);
         if (data.invoice) {
           setInvoices((prev) => [data.invoice, ...prev]);
         }
         setToastMessage(data.message || `Switched to ${targetTier} plan!`);
+        setTimeout(() => setToastMessage(null), 4000);
+      } else if (data?.error) {
+        setToastMessage(data.error);
         setTimeout(() => setToastMessage(null), 4000);
       }
     } catch {
