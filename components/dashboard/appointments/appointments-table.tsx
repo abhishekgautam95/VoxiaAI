@@ -49,21 +49,21 @@ export function AppointmentsTable({
     switch (status) {
       case "Confirmed":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             Confirmed
           </span>
         );
       case "Completed":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-400">
             <CheckCircle2 className="h-3 w-3" />
             Completed
           </span>
         );
       case "Cancelled":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 px-2.5 py-0.5 text-[11px] font-semibold text-rose-400">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 text-[11px] font-semibold text-rose-400">
             <XCircle className="h-3 w-3" />
             Cancelled
           </span>
@@ -83,7 +83,7 @@ export function AppointmentsTable({
             placeholder="Search by customer name, phone number, service..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30"
+            className="w-full rounded-lg border border-zinc-800/80 bg-zinc-950 pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           />
           {searchQuery && (
             <button
@@ -96,9 +96,9 @@ export function AppointmentsTable({
           )}
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-1 text-xs">
-          <span className="px-2 text-[11px] text-zinc-400 flex items-center gap-1">
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-zinc-800/80 bg-zinc-900/60 p-1 text-xs">
+          <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1">
             <Filter className="h-3 w-3 text-cyan-400" /> Status:
           </span>
           {(["All", "Confirmed", "Completed", "Cancelled"] as const).map(
@@ -107,10 +107,10 @@ export function AppointmentsTable({
                 key={status}
                 type="button"
                 onClick={() => setStatusFilter(status)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                   statusFilter === status
-                    ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                    ? "bg-zinc-900 text-cyan-400 border border-cyan-500/30 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
                 }`}
               >
                 {status}

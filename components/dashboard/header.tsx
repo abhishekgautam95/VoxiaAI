@@ -257,7 +257,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         <button
           type="button"
           onClick={onToggleMobileMenu}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 lg:hidden transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 lg:hidden transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           aria-label="Toggle navigation menu"
         >
           <Menu className="h-5 w-5" />
@@ -268,7 +268,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           <button
             type="button"
             onClick={() => setIsOrgDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-1.5 text-left text-sm transition-all hover:border-zinc-700 hover:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+            className="flex items-center gap-2.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-1.5 text-left text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             aria-expanded={isOrgDropdownOpen}
             aria-haspopup="true"
           >
@@ -278,10 +278,10 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
 
             <div className="flex flex-col text-left">
               <div className="flex items-center gap-1.5">
-                <span className="max-w-[130px] truncate font-medium text-zinc-100 sm:max-w-[180px]">
+                <span className="max-w-[130px] truncate font-bold tracking-wide text-zinc-100 sm:max-w-[180px]">
                   {selectedOrg.name}
                 </span>
-                <span className="hidden rounded bg-cyan-950/80 border border-cyan-800/50 px-1 py-0.2 text-[9px] font-semibold tracking-wide text-cyan-300 sm:inline-block">
+                <span className="hidden rounded-md bg-cyan-950/80 border border-cyan-500/30 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-cyan-400 sm:inline-block">
                   {selectedOrg.plan}
                 </span>
               </div>
@@ -296,8 +296,8 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
 
           {/* Org Selector Dropdown Menu */}
           {isOrgDropdownOpen && (
-            <div className="absolute left-0 mt-2 w-72 origin-top-left rounded-xl border border-zinc-800 bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100">
-              <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+            <div className="absolute left-0 mt-2 w-72 origin-top-left rounded-xl border border-zinc-800/80 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100">
+              <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                 Organizations & Clinics
               </div>
 
@@ -309,25 +309,25 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                       key={org.id}
                       type="button"
                       onClick={() => handleSelectOrg(org)}
-                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-lg border px-2.5 py-2 text-xs transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                         isSelected
-                          ? "bg-zinc-800/80 text-white"
-                          : "text-zinc-300 hover:bg-zinc-800/40 hover:text-white"
+                          ? "border-cyan-500/30 bg-zinc-900 text-white"
+                          : "border-transparent text-zinc-300 hover:bg-zinc-900 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold ${
                             isSelected
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                              : "bg-zinc-800 text-zinc-400"
+                              ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                              : "bg-zinc-900 text-zinc-400 border border-zinc-800/80"
                           }`}
                         >
                           {org.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="text-left">
-                          <p className="font-medium text-zinc-200">{org.name}</p>
-                          <p className="text-[10px] text-zinc-400">{org.phone}</p>
+                          <p className="font-semibold text-zinc-100">{org.name}</p>
+                          <p className="text-[10px] text-zinc-400 font-mono">{org.phone}</p>
                         </div>
                       </div>
 
@@ -339,10 +339,14 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                 })}
               </div>
 
-              <div className="mt-1.5 border-t border-zinc-800 pt-1.5">
+              <div className="mt-1.5 border-t border-zinc-800/80 pt-1.5">
                 <button
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-950/30 transition-colors"
+                  onClick={() => {
+                    setIsOrgDropdownOpen(false);
+                    router.push("/dashboard/phone-numbers");
+                  }}
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-cyan-400 hover:bg-cyan-950/30 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Connect New Business / Inbound Line</span>
@@ -360,10 +364,10 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           <button
             type="button"
             onClick={handleToggleAgentLive}
-            className={`group relative flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition-all duration-200 ${
+            className={`group relative flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
               isAgentLive
-                ? "border-emerald-500/30 bg-emerald-950/40 text-emerald-300 hover:bg-emerald-950/60 shadow-sm shadow-emerald-950"
-                : "border-zinc-700/60 bg-zinc-900 text-zinc-400 hover:bg-zinc-800/80"
+                ? "border-emerald-500/30 bg-emerald-950/40 text-emerald-400 hover:bg-emerald-950/60 shadow-sm shadow-emerald-950"
+                : "border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-900"
             }`}
             title={`Click to ${isAgentLive ? "pause/disable" : "activate"} live phone answering`}
           >
@@ -371,7 +375,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
             {isAgentLive ? (
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
               </span>
             ) : (
               <span className="h-2 w-2 rounded-full bg-zinc-500" />
@@ -389,7 +393,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
             <Power
               className={`h-3 w-3 transition-colors ${
                 isAgentLive
-                  ? "text-emerald-400 group-hover:text-emerald-200"
+                  ? "text-emerald-400 group-hover:text-emerald-300"
                   : "text-zinc-500 group-hover:text-zinc-300"
               }`}
             />
@@ -400,7 +404,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
         <button
           type="button"
           onClick={handleTestCall}
-          className="hidden sm:flex items-center gap-1.5 rounded-lg border border-zinc-700/70 bg-gradient-to-r from-zinc-800/90 to-zinc-900 px-2.5 py-1.5 text-xs font-medium text-zinc-200 shadow-sm transition-all hover:border-cyan-500/50 hover:text-white hover:shadow-cyan-500/10"
+          className="hidden sm:flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-zinc-100 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-400/50 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         >
           <PhoneCall className="h-3.5 w-3.5 text-cyan-400" />
           <span>Test Call</span>
@@ -411,7 +415,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           <button
             type="button"
             onClick={() => setIsNotificationsOpen((prev) => !prev)}
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800/80 bg-zinc-900/60 text-zinc-400 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             aria-label="View notifications"
             aria-expanded={isNotificationsOpen}
           >
@@ -422,11 +426,11 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           </button>
 
           {isNotificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-2xl border border-zinc-800 bg-zinc-950/95 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100 z-50">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-xl border border-zinc-800/80 bg-zinc-950/95 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100 z-50">
               <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5 px-1">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-cyan-400" />
-                  <span className="text-xs font-bold text-white">Live Clinic Activity</span>
+                  <span className="text-xs font-bold tracking-wide text-zinc-100">Live Clinic Activity</span>
                 </div>
                 {hasUnread && (
                   <button
@@ -434,7 +438,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                     onClick={() =>
                       setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
                     }
-                    className="flex items-center gap-1 text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                    className="flex items-center gap-1 text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none"
                   >
                     <CheckCheck className="h-3 w-3" />
                     <span>Mark all read</span>
@@ -453,19 +457,19 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                       );
                       setIsNotificationsOpen(false);
                     }}
-                    className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors ${
+                    className={`flex items-start gap-3 rounded-lg p-2.5 transition-colors ${
                       notif.unread
-                        ? "bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800"
-                        : "hover:bg-zinc-900/50"
+                        ? "bg-zinc-900 hover:bg-zinc-800/80 border border-cyan-500/30"
+                        : "hover:bg-zinc-900/60 border border-transparent"
                     }`}
                   >
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs ${
                         notif.type === "appointment"
-                          ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                          ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
                           : notif.type === "call"
-                          ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
-                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                          ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
+                          : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
                       }`}
                     >
                       {notif.type === "appointment" ? (
@@ -484,7 +488,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                         </p>
                         <span className="text-[10px] text-zinc-500 shrink-0">{notif.time}</span>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                      <p className="mt-0.5 text-[11px] text-zinc-400 leading-relaxed line-clamp-2">
                         {notif.description}
                       </p>
                     </div>
@@ -500,7 +504,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                 <a
                   href="/dashboard/calls"
                   onClick={() => setIsNotificationsOpen(false)}
-                  className="text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
                 >
                   View All Call Records & Transcripts &rarr;
                 </a>
@@ -514,15 +518,15 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-full p-0.5 transition-all hover:ring-2 hover:ring-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+            className="flex items-center gap-2 rounded-full p-0.5 transition-all hover:ring-1 hover:ring-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             aria-expanded={isProfileOpen}
             aria-haspopup="true"
           >
-            {/* Avatar Pill */}
+            {/* Avatar Ring */}
             <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 text-xs font-semibold text-white shadow-sm ring-1 ring-zinc-700">
               {currentUser?.name ? currentUser.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() : "OW"}
               {/* Online indicator */}
-              <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-zinc-950 bg-emerald-500" />
+              <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-zinc-950 bg-emerald-400" />
             </div>
 
             <ChevronDown
@@ -534,14 +538,14 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
 
           {/* User Profile Dropdown Menu */}
           {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-zinc-800 bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-xl border border-zinc-800/80 bg-zinc-950/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 duration-100">
               {/* Profile Card Header */}
               <div className="border-b border-zinc-800/80 px-3 py-2.5">
-                <p className="text-xs font-semibold text-zinc-100">{currentUser?.name || "Workspace Owner"}</p>
+                <p className="text-xs font-bold tracking-wide text-zinc-100">{currentUser?.name || "Workspace Owner"}</p>
                 <p className="truncate text-[11px] text-zinc-400">
                   {currentUser?.email || "demo.owner@voxia.local"}
                 </p>
-                <div className="mt-1.5 inline-flex items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-cyan-300">
+                <div className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-cyan-500/30 bg-zinc-900 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-400">
                   <Shield className="h-2.5 w-2.5" /> {currentOrg?.name || "Apex Health & Dental"}
                 </div>
               </div>
@@ -550,7 +554,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
               <div className="py-1 text-xs">
                 <a
                   href="/dashboard/settings"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-800/70 hover:text-white transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                 >
                   <Sliders className="h-3.5 w-3.5 text-zinc-400" />
                   <span>Receptionist Preferences</span>
@@ -558,7 +562,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
 
                 <a
                   href="/dashboard/agent"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-800/70 hover:text-white transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                 >
                   <Mic className="h-3.5 w-3.5 text-zinc-400" />
                   <span>Voice & LLM Model Tuning</span>
@@ -566,7 +570,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
 
                 <a
                   href="/dashboard/settings"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-800/70 hover:text-white transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                 >
                   <Key className="h-3.5 w-3.5 text-zinc-400" />
                   <span>API Keys & Webhooks</span>
@@ -578,7 +582,7 @@ export function Header({ onToggleMobileMenu }: HeaderProps) {
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-950/30 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-950/30 transition-colors focus:outline-none focus:ring-1 focus:ring-rose-500/50"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   <span>Sign Out</span>

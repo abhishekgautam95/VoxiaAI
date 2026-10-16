@@ -45,13 +45,13 @@ export function AudioPlayer({ totalDurationSec }: AudioPlayerProps) {
       : 0;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-950/80 p-3">
+    <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/60 p-3">
       <div className="flex items-center gap-3">
         {/* Play / Pause */}
         <button
           type="button"
           onClick={togglePlay}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-white shadow-lg shadow-cyan-500/25 hover:bg-cyan-400 transition-colors"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-400/30 bg-cyan-500 text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:bg-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         >
           {isPlaying ? (
             <Pause className="h-4 w-4 fill-current" />
@@ -63,7 +63,7 @@ export function AudioPlayer({ totalDurationSec }: AudioPlayerProps) {
         {/* Progress */}
         <div className="flex-1 space-y-1">
           <div
-            className="relative h-1.5 w-full cursor-pointer rounded-full bg-zinc-800"
+            className="relative h-1.5 w-full cursor-pointer rounded-sm bg-zinc-800"
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const pct = (e.clientX - rect.left) / rect.width;
@@ -71,12 +71,12 @@ export function AudioPlayer({ totalDurationSec }: AudioPlayerProps) {
             }}
           >
             <div
-              className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 transition-all duration-100"
+              className="absolute left-0 top-0 h-full rounded-sm bg-cyan-400 transition-all duration-100"
               style={{ width: `${progress}%` }}
             />
             <div
-              className="absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-white border-2 border-cyan-500 shadow-sm transition-all duration-100"
-              style={{ left: `calc(${progress}% - 6px)` }}
+              className="absolute top-1/2 -translate-y-1/2 h-3 w-1.5 rounded-sm bg-white border border-cyan-400 shadow-sm transition-all duration-100"
+              style={{ left: `calc(${progress}% - 3px)` }}
             />
           </div>
           <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
@@ -95,7 +95,7 @@ export function AudioPlayer({ totalDurationSec }: AudioPlayerProps) {
             const idx = speeds.indexOf(playbackSpeed);
             setPlaybackSpeed(speeds[(idx + 1) % speeds.length]);
           }}
-          className="shrink-0 rounded border border-zinc-700 bg-zinc-800/80 px-2 py-0.5 text-[10px] font-semibold text-zinc-300 hover:bg-zinc-700 transition-colors"
+          className="shrink-0 rounded-md border border-zinc-800/80 bg-zinc-900 px-2 py-0.5 text-[10px] font-semibold text-zinc-300 hover:border-cyan-500/30 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         >
           {playbackSpeed}x
         </button>

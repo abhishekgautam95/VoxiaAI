@@ -169,7 +169,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
           {/* Main Navigation */}
           <div>
-            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Navigation
             </div>
             <nav className="space-y-1" aria-label="Main Navigation">
@@ -183,15 +183,15 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
                     href={item.href}
                     prefetch={false}
                     onClick={onCloseMobile}
-                    className={`group relative flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
+                    className={`group relative flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                       active
-                        ? "bg-gradient-to-r from-zinc-800/90 to-zinc-900 text-white shadow-sm ring-1 ring-zinc-700/60"
-                        : "text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200"
+                        ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                        : "border-transparent text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
                     }`}
                   >
                     {/* Active indicator bar */}
                     {active && (
-                      <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-cyan-400 shadow-sm shadow-cyan-400/50" />
+                      <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-sm bg-cyan-400 shadow-sm shadow-cyan-400/50" />
                     )}
 
                     <div className="flex items-center gap-3">
@@ -207,10 +207,10 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
 
                     {item.badge && (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium tracking-tight ${
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-tight ${
                           item.badgeVariant === "success"
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                            : "bg-zinc-800 text-zinc-400 border border-zinc-700/50"
+                            : "bg-zinc-900 text-zinc-400 border border-zinc-800/80"
                         }`}
                       >
                         {item.href === "/dashboard/calls"
@@ -228,7 +228,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
 
           {/* Infrastructure & Telephony */}
           <div>
-            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Telephony & Tools
             </div>
             <nav className="space-y-1" aria-label="Telephony Navigation">
@@ -242,10 +242,10 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
                     href={item.href}
                     prefetch={false}
                     onClick={onCloseMobile}
-                    className={`group relative flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
+                    className={`group relative flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                       active
-                        ? "bg-zinc-800/90 text-white ring-1 ring-zinc-700/60"
-                        : "text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200"
+                        ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                        : "border-transparent text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -265,25 +265,25 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
           </div>
 
           {/* Agent Real-time Status Card */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 backdrop-blur-sm">
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5 backdrop-blur-sm">
             <div className="flex items-center justify-between pb-2">
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-zinc-400">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-zinc-500">
                 Live Receptionist
               </span>
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700/60 text-cyan-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800/80 text-cyan-400">
                 <Headphones className="h-3.5 w-3.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-zinc-200">
+                <p className="truncate text-xs font-bold tracking-wide text-zinc-100">
                   {agentInfo.displayName}
                 </p>
-                <p className="truncate text-[10px] text-zinc-400">
+                <p className="truncate text-[11px] text-zinc-400 font-mono">
                   {agentInfo.phoneNumber}
                 </p>
               </div>
@@ -292,7 +292,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
               <span className="flex items-center gap-1">
                 <Activity className="h-3 w-3 text-cyan-400" /> 38ms latency
               </span>
-              <span className="text-emerald-400 font-medium">SIP Active</span>
+              <span className="text-emerald-400 font-semibold">SIP Active</span>
             </div>
           </div>
         </div>
@@ -300,9 +300,9 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
 
       {/* Footer / Quota & Usage Bar */}
       <div className="border-t border-zinc-800/80 p-3">
-        <div className="rounded-xl border border-zinc-800/80 bg-gradient-to-b from-zinc-900/60 to-zinc-950 p-3 shadow-inner">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3 shadow-inner">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-zinc-300 flex items-center gap-1.5">
+            <span className="font-bold tracking-wide text-zinc-100 flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-amber-400" /> Voice Minutes
             </span>
             <span className="text-[11px] font-semibold text-zinc-400">
@@ -311,14 +311,14 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
           </div>
 
           {/* Progress Bar */}
-          <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+          <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-sm bg-zinc-800">
             <div
-              className={`h-full rounded-full transition-all duration-300 ${
+              className={`h-full rounded-sm transition-all duration-300 ${
                 billingUsage.percentMinutesUsed > 90
-                  ? "bg-rose-500"
+                  ? "bg-rose-400"
                   : billingUsage.percentMinutesUsed > 75
-                  ? "bg-amber-500"
-                  : "bg-gradient-to-r from-cyan-500 to-indigo-500"
+                  ? "bg-amber-400"
+                  : "bg-cyan-400"
               }`}
               style={{ width: `${Math.min(billingUsage.percentMinutesUsed, 100)}%` }}
             />
@@ -329,7 +329,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
             <Link
               href="/dashboard/settings"
               prefetch={false}
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+              className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
             >
               Upgrade Plan &rarr;
             </Link>

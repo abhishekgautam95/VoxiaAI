@@ -214,15 +214,18 @@ function AgentConfigContent() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Agent Orchestration Engine
             </span>
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-white">
             AI Voice Agent Configuration
           </h1>
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
             Configure business identity, customize system prompts with industry routines, select ElevenLabs voice timbre, and test live calls in real-time.
           </p>
         </div>
@@ -233,7 +236,7 @@ function AgentConfigContent() {
             <button
               type="button"
               onClick={handleDiscard}
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2 text-xs font-semibold text-zinc-300 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Discard Changes</span>
@@ -244,7 +247,7 @@ function AgentConfigContent() {
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             {isSaving ? (
               <span className="flex items-center gap-1.5">
@@ -263,12 +266,12 @@ function AgentConfigContent() {
 
       {/* Error Message Banner */}
       {errorMessage && (
-        <div className="flex items-center justify-between rounded-xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-xs text-rose-300 backdrop-blur-md">
+        <div className="flex items-center justify-between rounded-xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-xs text-rose-400 backdrop-blur-md">
           <span>{errorMessage}</span>
           <button
             type="button"
             onClick={() => setErrorMessage(null)}
-            className="text-rose-400 hover:text-white font-medium"
+            className="text-rose-400 hover:text-white font-semibold"
           >
             Dismiss
           </button>
@@ -277,12 +280,12 @@ function AgentConfigContent() {
 
       {/* Save Success Banner */}
       {saveSuccessMessage && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-4 py-3 text-xs text-emerald-300 backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/40 px-4 py-3 text-xs text-emerald-400 backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="h-4 w-4 text-emerald-400" />
             <span className="font-medium">
               Configuration deployed! Your AI voice receptionist for{" "}
-              <strong>{config.businessName}</strong> is now live on inbound SIP lines with {currentVoice.label}.
+              <strong className="text-zinc-100">{config.businessName}</strong> is now live on inbound SIP lines with {currentVoice.label}.
             </span>
           </div>
           <button
@@ -295,51 +298,51 @@ function AgentConfigContent() {
         </div>
       )}
 
-      {/* Live Agent Overview Pill Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-3 backdrop-blur-sm">
+      {/* Live Agent Overview Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5 backdrop-blur-sm">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700/60 text-cyan-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800/80 text-cyan-400">
             <Building2 className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-zinc-400">Organization</p>
-            <p className="truncate text-xs font-semibold text-zinc-200">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Organization</p>
+            <p className="truncate text-xs font-bold tracking-wide text-zinc-100">
               {config.businessName}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700/60 text-indigo-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800/80 text-cyan-400">
             <Radio className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-zinc-400">Industry</p>
-            <p className="truncate text-xs font-semibold text-zinc-200">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Industry</p>
+            <p className="truncate text-xs font-bold tracking-wide text-zinc-100">
               {config.businessCategory}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700/60 text-violet-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800/80 text-cyan-400">
             <Mic className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-zinc-400">Voice Synthesis</p>
-            <p className="truncate text-xs font-semibold text-zinc-200">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Voice Synthesis</p>
+            <p className="truncate text-xs font-bold tracking-wide text-zinc-100">
               {currentVoice.label}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700/60 text-emerald-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800/80 text-emerald-400">
             <PhoneCall className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-zinc-400">Language</p>
-            <p className="truncate text-xs font-semibold text-zinc-200">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Language</p>
+            <p className="truncate text-xs font-bold tracking-wide text-zinc-100">
               {config.primaryLanguage}
             </p>
           </div>
@@ -350,15 +353,15 @@ function AgentConfigContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Tabbed Configuration Panels */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Tabs Navigation (Shadcn / Tailwind Style) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-1.5 text-xs">
+          {/* Tabs Navigation */}
+          <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-1.5 text-xs">
             <button
               type="button"
               onClick={() => setActiveTab("business")}
-              className={`flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium transition-all ${
+              className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                 activeTab === "business"
-                  ? "bg-gradient-to-r from-zinc-800 to-zinc-900 text-white shadow-sm ring-1 ring-zinc-700/80"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                  ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
               }`}
             >
               <Building2
@@ -372,10 +375,10 @@ function AgentConfigContent() {
             <button
               type="button"
               onClick={() => setActiveTab("prompt")}
-              className={`flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium transition-all ${
+              className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                 activeTab === "prompt"
-                  ? "bg-gradient-to-r from-zinc-800 to-zinc-900 text-white shadow-sm ring-1 ring-zinc-700/80"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                  ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
               }`}
             >
               <Bot
@@ -389,10 +392,10 @@ function AgentConfigContent() {
             <button
               type="button"
               onClick={() => setActiveTab("voice")}
-              className={`flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium transition-all ${
+              className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                 activeTab === "voice"
-                  ? "bg-gradient-to-r from-zinc-800 to-zinc-900 text-white shadow-sm ring-1 ring-zinc-700/80"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                  ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
               }`}
             >
               <Mic
@@ -406,10 +409,10 @@ function AgentConfigContent() {
             <button
               type="button"
               onClick={() => setActiveTab("tools")}
-              className={`flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium transition-all ${
+              className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                 activeTab === "tools"
-                  ? "bg-gradient-to-r from-zinc-800 to-zinc-900 text-white shadow-sm ring-1 ring-zinc-700/80"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                  ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
               }`}
             >
               <Wrench
@@ -447,16 +450,16 @@ function AgentConfigContent() {
             <LiveTestWidget config={config} />
 
             {/* Quick Testing Tips Card */}
-            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm text-xs">
-              <h4 className="font-semibold text-zinc-200 flex items-center gap-1.5">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 backdrop-blur-sm text-xs">
+              <h4 className="font-bold tracking-wide text-zinc-100 flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
                 Live Audio Testing Tips
               </h4>
-              <ul className="mt-2.5 space-y-2 text-zinc-400 text-[11px] leading-relaxed">
+              <ul className="mt-2.5 space-y-2 text-zinc-400 text-xs leading-relaxed">
                 <li className="flex items-start gap-1.5">
                   <span className="text-cyan-400">•</span>
                   <span>
-                    The simulator reads your configured <strong>Greeting Message</strong> and adapts dynamically to your <strong>System Prompt</strong>.
+                    The simulator reads your configured <strong className="text-zinc-100">Greeting Message</strong> and adapts dynamically to your <strong className="text-zinc-100">System Prompt</strong>.
                   </span>
                 </li>
                 <li className="flex items-start gap-1.5">
@@ -482,7 +485,7 @@ function AgentConfigContent() {
         <button
           type="button"
           onClick={() => setIsFloatingCallOpen(true)}
-          className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-4 py-3 text-xs font-bold text-white shadow-2xl shadow-cyan-500/30 ring-1 ring-white/20 transition-all hover:scale-105 hover:shadow-cyan-500/50"
+          className="group flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-4 py-3 text-xs font-bold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         >
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />

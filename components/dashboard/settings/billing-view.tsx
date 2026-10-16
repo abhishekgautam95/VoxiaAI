@@ -157,7 +157,7 @@ export function BillingView() {
       {/* Plan & Usage Summary Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Active Plan Card */}
-        <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 via-zinc-900/60 to-zinc-950 p-5 shadow-lg relative overflow-hidden">
+        <div className="rounded-xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/30 via-zinc-900/60 to-zinc-950 p-5 shadow-md shadow-cyan-500/10 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Zap className="h-28 w-28 text-cyan-400" />
           </div>
@@ -166,12 +166,12 @@ export function BillingView() {
             <span className="text-[11px] font-semibold text-cyan-400 uppercase tracking-wider">
               Current Active Plan
             </span>
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
+            <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
               {subscription?.status || "ACTIVE"}
             </span>
           </div>
 
-          <h3 className="mt-2 text-2xl font-extrabold text-white">
+          <h3 className="mt-2 text-2xl font-extrabold tracking-tight text-white">
             {currentTier === "STARTER"
               ? "Clinic Starter"
               : currentTier === "PRO"
@@ -204,9 +204,9 @@ export function BillingView() {
         </div>
 
         {/* Telephony Minute Meter Card */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-3">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
+            <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-zinc-100">
               <Clock className="h-4 w-4 text-cyan-400" />
               <span>Voice Answering Meter</span>
             </div>
@@ -215,10 +215,10 @@ export function BillingView() {
             </span>
           </div>
 
-          <div className="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-zinc-800 rounded-sm h-2 overflow-hidden">
             <div
-              className={`h-2.5 rounded-full transition-all duration-500 ${
-                usage.percentMinutesUsed > 85 ? "bg-amber-400" : "bg-cyan-500"
+              className={`h-2 rounded-sm transition-all duration-500 ${
+                usage.percentMinutesUsed > 85 ? "bg-amber-400" : "bg-cyan-400"
               }`}
               style={{ width: `${Math.max(usage.percentMinutesUsed, 5)}%` }}
             />
@@ -231,26 +231,26 @@ export function BillingView() {
             </span>
           </div>
 
-          <p className="text-[11px] text-zinc-500 leading-relaxed border-t border-zinc-800/60 pt-2">
+          <p className="text-[11px] text-zinc-500 leading-relaxed border-t border-zinc-800/80 pt-2">
             Includes inbound telephony, caller speech-to-text, and ElevenLabs neural streaming synthesis.
           </p>
         </div>
 
         {/* Carrier Lines & Payment Method */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-3">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
-              <Phone className="h-4 w-4 text-violet-400" />
+            <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-zinc-100">
+              <Phone className="h-4 w-4 text-cyan-400" />
               <span>Carrier Lines Allocated</span>
             </div>
-            <span className="text-xs font-mono font-bold text-violet-400">
+            <span className="text-xs font-mono font-bold text-cyan-400">
               {usage.activeNumbers} / {usage.includedNumbers} Lines
             </span>
           </div>
 
-          <div className="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-zinc-800 rounded-sm h-2 overflow-hidden">
             <div
-              className="bg-violet-500 h-2.5 rounded-full transition-all duration-500"
+              className="bg-cyan-500 h-2 rounded-sm transition-all duration-500"
               style={{
                 width: `${Math.min(
                   Math.round((usage.activeNumbers / usage.includedNumbers) * 100),
@@ -260,9 +260,9 @@ export function BillingView() {
             />
           </div>
 
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/60 p-2.5 flex items-center justify-between">
+          <div className="rounded-lg border border-zinc-800/80 bg-zinc-950/60 p-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-800 text-zinc-200">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-900 border border-zinc-800/80 text-zinc-200">
                 <CreditCard className="h-4 w-4 text-cyan-400" />
               </div>
               <div>
@@ -272,7 +272,7 @@ export function BillingView() {
             </div>
             <button
               type="button"
-              className="text-[11px] text-cyan-400 hover:text-cyan-300 underline"
+              className="text-[11px] text-cyan-400 hover:text-cyan-300 underline focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded-sm px-1"
             >
               Update
             </button>
@@ -281,9 +281,9 @@ export function BillingView() {
       </div>
 
       {/* Plan Comparison & Upgrade Matrix */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-4">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-white">Scale Receptionist Capacity</h3>
+          <h3 className="text-sm font-bold tracking-wide text-zinc-100">Scale Receptionist Capacity</h3>
           <p className="text-xs text-zinc-400">
             Switch tiers dynamically as your practice call volume grows. Upgrades apply instantly.
           </p>
@@ -297,26 +297,26 @@ export function BillingView() {
                 key={t.id}
                 className={`rounded-xl border p-5 flex flex-col justify-between transition-all ${
                   isCurrent
-                    ? "border-cyan-500 bg-cyan-950/20 shadow-md ring-1 ring-cyan-500/50"
-                    : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
+                    ? "border-cyan-500/30 bg-zinc-900 shadow-md shadow-cyan-500/10"
+                    : "border-zinc-800/80 bg-zinc-950/60 hover:border-zinc-700"
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-sm text-white">{t.name}</h4>
+                    <h4 className="font-bold text-sm text-zinc-100">{t.name}</h4>
                     {isCurrent && (
-                      <span className="rounded bg-cyan-500/20 px-2 py-0.5 text-[10px] font-semibold text-cyan-400">
+                      <span className="rounded-md bg-cyan-500/15 border border-cyan-500/30 px-2 py-0.5 text-[10px] font-semibold text-cyan-400">
                         Current
                       </span>
                     )}
                   </div>
                   <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-2xl font-extrabold text-white">${t.priceMonthly}</span>
+                    <span className="text-2xl font-extrabold tracking-tight text-white">${t.priceMonthly}</span>
                     <span className="text-xs text-zinc-400">/ month</span>
                   </div>
-                  <p className="mt-2 text-[11px] text-zinc-400 leading-snug">{t.description}</p>
+                  <p className="mt-2 text-[11px] text-zinc-400 leading-relaxed">{t.description}</p>
 
-                  <div className="mt-4 border-t border-zinc-800 pt-3 space-y-2">
+                  <div className="mt-4 border-t border-zinc-800/80 pt-3 space-y-2">
                     {t.features.map((feat, i) => (
                       <div key={i} className="flex items-center gap-2 text-xs text-zinc-300">
                         <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
@@ -331,10 +331,10 @@ export function BillingView() {
                     type="button"
                     disabled={isCurrent || upgradingTier !== null}
                     onClick={() => handleUpgradeTier(t.id)}
-                    className={`w-full rounded-lg py-2 text-xs font-semibold transition-all ${
+                    className={`w-full rounded-lg py-2 text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                       isCurrent
                         ? "bg-zinc-800 text-zinc-500 cursor-default"
-                        : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm"
+                        : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md shadow-cyan-500/10 hover:scale-[1.01] active:scale-[0.99]"
                     }`}
                   >
                     {upgradingTier === t.id
@@ -351,22 +351,22 @@ export function BillingView() {
       </div>
 
       {/* Invoice History Table */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-3">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white">Billing & Payment Invoices</h3>
+            <h3 className="text-sm font-bold tracking-wide text-zinc-100">Billing & Payment Invoices</h3>
             <p className="text-xs text-zinc-400">
               Download tax receipts and itemized monthly telephony usage summaries.
             </p>
           </div>
-          <span className="text-[11px] text-zinc-500">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             {invoices.length} Invoices on Record
           </span>
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-950">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-zinc-800 bg-zinc-900/60 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+            <thead className="border-b border-zinc-800/80 bg-zinc-900/60 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
               <tr>
                 <th className="px-4 py-3">Invoice Number</th>
                 <th className="px-4 py-3">Billing Period</th>
@@ -392,7 +392,7 @@ export function BillingView() {
                     {formatCurrency(inv.amountPaidCents)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                    <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
                       <ShieldCheck className="h-3 w-3" /> Paid
                     </span>
                   </td>
@@ -402,7 +402,7 @@ export function BillingView() {
                       onClick={() =>
                         alert(`Downloading receipt ${inv.invoiceNumber} (${formatCurrency(inv.amountPaidCents)})...`)
                       }
-                      className="inline-flex items-center gap-1 rounded border border-zinc-700/80 bg-zinc-800 px-2.5 py-1 text-[11px] text-zinc-300 hover:text-white hover:border-cyan-500 transition-colors"
+                      className="inline-flex items-center gap-1 rounded-md border border-zinc-800/80 bg-zinc-900 px-2.5 py-1 text-[11px] text-zinc-300 hover:text-white hover:border-cyan-500/30 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                     >
                       <Download className="h-3 w-3 text-cyan-400" />
                       <span>PDF</span>

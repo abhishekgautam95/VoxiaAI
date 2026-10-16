@@ -87,14 +87,14 @@ export default function LandingPage() {
             <Link
               href="/login"
               prefetch={false}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/80 px-3.5 py-1.5 text-xs font-semibold text-zinc-200 hover:border-zinc-700 hover:text-white transition-all"
+              className="rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3.5 py-1.5 text-xs font-semibold text-zinc-200 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             >
               Sign In
             </Link>
             <Link
               href="/login"
               prefetch={false}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             >
               <Sparkles className="h-3.5 w-3.5" />
               <span>Launch Live Demo</span>
@@ -107,7 +107,7 @@ export default function LandingPage() {
       <section className="relative pt-20 pb-16 sm:pt-28 sm:pb-24 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-3.5 py-1 text-xs font-medium text-cyan-300 shadow-sm shadow-cyan-500/10 mb-8 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-md border border-cyan-500/30 bg-zinc-900/60 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-cyan-400 shadow-md shadow-cyan-500/10 mb-8 backdrop-blur-sm">
             <span className="flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
@@ -122,7 +122,7 @@ export default function LandingPage() {
             </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="mt-6 text-xs sm:text-sm md:text-base text-zinc-400 max-w-3xl mx-auto leading-relaxed">
             Never miss a patient call, emergency toothache, or after-hours consultation again.
             Voxia answers inbound telephony lines instantly with human-natural voice, resolves FAQs,
             and schedules appointments directly into your calendar without double-booking.
@@ -133,7 +133,7 @@ export default function LandingPage() {
             <Link
               href="/login"
               prefetch={false}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-cyan-500/25 hover:scale-[1.02] transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             >
               <span>Launch Live Interactive Demo</span>
               <ArrowRight className="h-4 w-4" />
@@ -142,7 +142,7 @@ export default function LandingPage() {
             <Link
               href="/login?testCall=true"
               prefetch={false}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/90 px-6 py-3.5 text-sm font-semibold text-zinc-200 hover:border-zinc-700 hover:text-white transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-6 py-3 text-sm font-semibold text-zinc-200 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             >
               <PhoneCall className="h-4 w-4 text-cyan-400" />
               <span>Simulate Voice Call</span>
@@ -150,24 +150,27 @@ export default function LandingPage() {
           </div>
 
           {/* Interactive Voice Waveform Simulation Card */}
-          <div className="mt-14 max-w-4xl mx-auto rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+          <div className="mt-14 max-w-4xl mx-auto rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800/80 gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
                   <Headphones className="h-5 w-5" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-bold text-white">Live Call Inbound Stream</p>
-                  <p className="text-xs text-zinc-400">Caller: +1 (415) 329-8812 • Apex Health & Dental</p>
+                  <p className="text-sm font-bold tracking-wide text-zinc-100">Live Call Inbound Stream</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed">Caller: +1 (415) 329-8812 • Apex Health & Dental</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-3 py-1 text-xs font-semibold text-emerald-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-3 py-1 text-xs font-semibold text-emerald-400">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                  </span>
                   Live Call Active
                 </span>
-                <span className="flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-950 px-2.5 py-1 text-[11px] font-mono text-zinc-400">
+                <span className="flex items-center gap-1 rounded-md border border-zinc-800/80 bg-zinc-950 px-2.5 py-1 text-[11px] font-mono text-zinc-400">
                   <Activity className="h-3 w-3 text-cyan-400" /> 28ms SIP
                 </span>
               </div>
@@ -176,29 +179,29 @@ export default function LandingPage() {
             {/* Conversation Preview Bubbles */}
             <div className="mt-6 space-y-4 text-left">
               <div className="flex gap-3 max-w-xl">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-[10px] font-bold text-zinc-300">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-zinc-800/80 bg-zinc-900 text-[10px] font-bold text-zinc-300">
                   CALL
                 </div>
-                <div className="rounded-2xl rounded-tl-sm bg-zinc-800/80 border border-zinc-700/60 px-4 py-2.5 text-xs text-zinc-200">
+                <div className="rounded-lg rounded-tl-none bg-zinc-900 border border-zinc-800/80 px-4 py-2.5 text-xs text-zinc-200 leading-relaxed">
                   &ldquo;Hi, I have a chipped molar and severe pain. Do you have any openings tomorrow morning?&rdquo;
                 </div>
               </div>
 
               <div className="flex gap-3 max-w-xl ml-auto flex-row-reverse">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-[10px] font-bold text-white shadow-sm">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-tr from-cyan-600 to-indigo-600 text-[10px] font-bold text-white shadow-sm">
                   AI
                 </div>
-                <div className="rounded-2xl rounded-tr-sm bg-cyan-950/50 border border-cyan-800/50 px-4 py-2.5 text-xs text-cyan-100">
+                <div className="rounded-lg rounded-tr-none bg-cyan-950/40 border border-cyan-500/30 px-4 py-2.5 text-xs text-cyan-100 leading-relaxed">
                   &ldquo;I understand how uncomfortable that is. I have reserved an emergency slot tomorrow at 10:30 AM with Dr. Sarah Smith. I have also dispatched an SMS confirmation to your number.&rdquo;
                 </div>
               </div>
             </div>
 
             {/* Animated Audio Waveform Bar */}
-            <div className="mt-6 flex items-center justify-between rounded-xl bg-zinc-950/80 border border-zinc-800/80 p-3.5">
+            <div className="mt-6 flex items-center justify-between rounded-lg bg-zinc-950 border border-zinc-800/80 p-3.5">
               <div className="flex items-center gap-2">
                 <Volume2 className="h-4 w-4 text-cyan-400" />
-                <span className="text-xs font-medium text-zinc-300">Rachel (Warm & Natural Neural Voice)</span>
+                <span className="text-xs font-bold tracking-wide text-zinc-100">Rachel (Warm & Natural Neural Voice)</span>
               </div>
 
               {/* Dynamic waveform visualizer */}
@@ -206,7 +209,7 @@ export default function LandingPage() {
                 {[12, 24, 16, 28, 20, 32, 14, 26, 36, 18, 30, 22, 14, 28, 18, 24, 12].map((h, i) => (
                   <span
                     key={i}
-                    className="w-1 rounded-full bg-gradient-to-t from-cyan-500 to-indigo-500 animate-pulse"
+                    className="w-1 rounded-sm bg-gradient-to-t from-cyan-500 to-indigo-500 animate-pulse"
                     style={{
                       height: `${h}px`,
                       animationDelay: `${i * 90}ms`,
@@ -222,24 +225,24 @@ export default function LandingPage() {
       </section>
 
       {/* Metrics Strip */}
-      <section className="border-y border-zinc-800/80 bg-zinc-900/30 py-8">
+      <section className="border-y border-zinc-800/80 bg-zinc-900/60 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
-              <p className="text-2xl sm:text-3xl font-extrabold text-cyan-400 font-mono">&lt; 300ms</p>
-              <p className="mt-1 text-xs text-zinc-400">Voice Synthesis Latency</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-cyan-400 font-mono">&lt; 300ms</p>
+              <p className="mt-1 text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Voice Synthesis Latency</p>
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-extrabold text-white font-mono">99.8%</p>
-              <p className="mt-1 text-xs text-zinc-400">Scheduling Accuracy</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono">99.8%</p>
+              <p className="mt-1 text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Scheduling Accuracy</p>
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-extrabold text-violet-400 font-mono">24 / 7</p>
-              <p className="mt-1 text-xs text-zinc-400">Zero Missed Patients</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-cyan-400 font-mono">24 / 7</p>
+              <p className="mt-1 text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Zero Missed Patients</p>
             </div>
             <div>
-              <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">$4,200+</p>
-              <p className="mt-1 text-xs text-zinc-400">Avg Monthly Staff Savings</p>
+              <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-400 font-mono">$4,200+</p>
+              <p className="mt-1 text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Avg Monthly Staff Savings</p>
             </div>
           </div>
         </div>
@@ -249,70 +252,70 @@ export default function LandingPage() {
       <section id="features" className="py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Enterprise Voice Infrastructure
             </h2>
             <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Engineered for Medical & Dental Excellence
             </p>
-            <p className="mt-4 text-sm text-zinc-400">
+            <p className="mt-4 text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Everything required to replace dropped calls, unstaffed lunch breaks, and busy signals with autonomous conversational AI.
             </p>
           </div>
 
           <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-7 hover:border-cyan-500/40 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-5">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-7 hover:border-cyan-500/30 hover:bg-zinc-900 transition-all duration-200">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mb-5">
                 <Zap className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-white">Sub-300ms Voice Synthesis</h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              <h3 className="text-base font-bold tracking-wide text-zinc-100">Sub-300ms Voice Synthesis</h3>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-zinc-400">
                 Streaming ElevenLabs neural voice models deliver lifelike human tone with zero conversational lag or awkward silence. Callers cannot tell they are speaking to an AI.
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[11px] text-cyan-400 font-medium">
+              <div className="mt-4 flex items-center gap-2 text-[11px] text-cyan-400 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Ultra-low latency WebSockets & SIP trunks
               </div>
             </div>
 
             {/* Card 2 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-7 hover:border-indigo-500/40 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-5">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-7 hover:border-cyan-500/30 hover:bg-zinc-900 transition-all duration-200">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mb-5">
                 <BookOpen className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-white">RAG Clinic Knowledge Base</h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              <h3 className="text-base font-bold tracking-wide text-zinc-100">RAG Clinic Knowledge Base</h3>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-zinc-400">
                 Ground answers in your practice documents, insurance plans (Delta Dental, Cigna, MetLife), prep instructions, and parking directions without hallucinating.
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[11px] text-indigo-400 font-medium">
+              <div className="mt-4 flex items-center gap-2 text-[11px] text-cyan-400 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Instant vector search & citation verification
               </div>
             </div>
 
             {/* Card 3 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-7 hover:border-violet-500/40 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 mb-5">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-7 hover:border-cyan-500/30 hover:bg-zinc-900 transition-all duration-200">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mb-5">
                 <CalendarCheck className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-white">Conflict-Free Calendar Scheduling</h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              <h3 className="text-base font-bold tracking-wide text-zinc-100">Conflict-Free Calendar Scheduling</h3>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-zinc-400">
                 Synchronizes in real time with Google Calendar & Cal.com. Automatically inspects existing bookings, enforces 15-minute provider buffers, and selects alternative openings.
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[11px] text-violet-400 font-medium">
+              <div className="mt-4 flex items-center gap-2 text-[11px] text-cyan-400 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Guaranteed zero double-booking collision
               </div>
             </div>
 
             {/* Card 4 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-7 hover:border-emerald-500/40 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-5">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-7 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all duration-200">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-5">
                 <ShieldCheck className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-white">24/7 Triage & 2-Way SMS Confirmations</h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              <h3 className="text-base font-bold tracking-wide text-zinc-100">24/7 Triage & 2-Way SMS Confirmations</h3>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-zinc-400">
                 Detects urgent escalation keywords (&quot;severe pain&quot;, &quot;emergency&quot;) and transfers via TwiML &lt;Dial&gt; to on-call doctors. Callers can text &quot;C&quot; or &quot;R&quot; to manage visits.
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[11px] text-emerald-400 font-medium">
+              <div className="mt-4 flex items-center gap-2 text-[11px] text-emerald-400 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Live human escalation with full audit trail
               </div>
             </div>
@@ -323,16 +326,16 @@ export default function LandingPage() {
       {/* Interactive ROI Calculator */}
       <section id="calculator" className="py-20 bg-zinc-900/30 border-t border-zinc-800/80">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto rounded-3xl border border-zinc-800 bg-zinc-950 p-8 sm:p-12 shadow-2xl">
+          <div className="max-w-4xl mx-auto rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 sm:p-12 shadow-2xl">
             <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-400 mb-3">
+              <div className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-[11px] uppercase tracking-wider font-semibold text-emerald-400 mb-3">
                 <DollarSign className="h-3.5 w-3.5" />
                 <span>Financial Impact Calculator</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                 Calculate Your Practice Savings
               </h2>
-              <p className="mt-2 text-xs sm:text-sm text-zinc-400">
+              <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
                 See how much front-desk labor and overtime cost Voxia eliminates every month.
               </p>
             </div>
@@ -341,7 +344,7 @@ export default function LandingPage() {
               {/* Sliders */}
               <div className="space-y-6">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-200 mb-2">
+                  <div className="flex items-center justify-between text-xs font-bold tracking-wide text-zinc-100 mb-2">
                     <span>Daily Inbound Calls</span>
                     <span className="font-mono text-cyan-400 font-bold">{dailyCalls} calls / day</span>
                   </div>
@@ -352,9 +355,9 @@ export default function LandingPage() {
                     step="5"
                     value={dailyCalls}
                     onChange={(e) => setDailyCalls(Number(e.target.value))}
-                    className="w-full accent-cyan-500 h-2 bg-zinc-800 rounded-lg cursor-pointer"
+                    className="w-full accent-cyan-400 h-2 bg-zinc-800 rounded-md cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   />
-                  <div className="flex justify-between text-[10px] text-zinc-500 mt-1">
+                  <div className="flex justify-between text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mt-1.5">
                     <span>10 (Boutique)</span>
                     <span>75 (Busy Clinic)</span>
                     <span>150+ (Multi-Doctor)</span>
@@ -362,7 +365,7 @@ export default function LandingPage() {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-200 mb-2">
+                  <div className="flex items-center justify-between text-xs font-bold tracking-wide text-zinc-100 mb-2">
                     <span>Front Desk Hourly Rate ($/hr)</span>
                     <span className="font-mono text-cyan-400 font-bold">${hourlyRate} / hr</span>
                   </div>
@@ -373,30 +376,30 @@ export default function LandingPage() {
                     step="1"
                     value={hourlyRate}
                     onChange={(e) => setHourlyRate(Number(e.target.value))}
-                    className="w-full accent-cyan-500 h-2 bg-zinc-800 rounded-lg cursor-pointer"
+                    className="w-full accent-cyan-400 h-2 bg-zinc-800 rounded-md cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   />
-                  <div className="flex justify-between text-[10px] text-zinc-500 mt-1">
+                  <div className="flex justify-between text-[11px] uppercase tracking-wider font-semibold text-zinc-500 mt-1.5">
                     <span>$18 / hr</span>
                     <span>$30 / hr</span>
                     <span>$50 / hr</span>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 text-xs text-zinc-400 space-y-1.5">
+                <div className="rounded-xl border border-zinc-800/80 bg-zinc-950 p-4 text-xs text-zinc-400 space-y-1.5">
                   <div className="flex justify-between">
                     <span>Monthly Calls Handled:</span>
-                    <span className="text-zinc-200 font-mono font-semibold">{monthlyCalls.toLocaleString()} calls</span>
+                    <span className="text-zinc-100 font-mono font-semibold">{monthlyCalls.toLocaleString()} calls</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Staff Hours Preserved:</span>
-                    <span className="text-zinc-200 font-mono font-semibold">{hoursSaved} hours / mo</span>
+                    <span className="text-zinc-100 font-mono font-semibold">{hoursSaved} hours / mo</span>
                   </div>
                 </div>
               </div>
 
               {/* Result Summary Card */}
-              <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 via-zinc-900/60 to-zinc-950 p-6 sm:p-8 text-center space-y-4 shadow-xl shadow-cyan-500/10">
-                <span className="text-xs uppercase tracking-wider font-semibold text-zinc-400">
+              <div className="rounded-xl border border-cyan-500/30 bg-zinc-950 p-6 sm:p-8 text-center space-y-4 shadow-md shadow-cyan-500/10">
+                <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">
                   Estimated Net Monthly Profit
                 </span>
                 <p className="text-4xl sm:text-5xl font-extrabold text-white font-mono tracking-tight">
@@ -404,11 +407,11 @@ export default function LandingPage() {
                   <span className="text-xs text-zinc-400 font-normal ml-1">/ month</span>
                 </p>
 
-                <div className="pt-3 border-t border-zinc-800">
+                <div className="pt-3 border-t border-zinc-800/80">
                   <p className="text-xs text-emerald-400 font-semibold font-mono">
                     +${annualSavings.toLocaleString()} Net Annual Practice Value
                   </p>
-                  <p className="text-[11px] text-zinc-400 mt-1">
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                     Factoring in $499/mo Pro Plan license with 2,500 included voice minutes.
                   </p>
                 </div>
@@ -416,7 +419,7 @@ export default function LandingPage() {
                 <Link
                   href="/login"
                   prefetch={false}
-                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all"
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 py-3 text-xs font-bold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   <span>Claim Your Savings &rarr;</span>
                 </Link>
@@ -430,25 +433,25 @@ export default function LandingPage() {
       <section id="pricing" className="py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Transparent Practice Pricing
             </h2>
             <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Predictable Plans With No Hidden Overages
             </p>
-            <p className="mt-3 text-sm text-zinc-400">
+            <p className="mt-3 text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Deploy in under 15 minutes. Cancel or upgrade anytime with prorated billing.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Starter Plan */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-7 flex flex-col justify-between">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-7 flex flex-col justify-between hover:border-zinc-700 transition-all">
               <div>
-                <h3 className="text-lg font-bold text-white">Starter</h3>
-                <p className="text-xs text-zinc-400 mt-1">Ideal for solo practitioners & boutique clinics</p>
+                <h3 className="text-lg font-bold tracking-wide text-zinc-100">Starter</h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">Ideal for solo practitioners & boutique clinics</p>
                 <div className="mt-5 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-white font-mono">$199</span>
+                  <span className="text-4xl font-extrabold tracking-tight text-white font-mono">$199</span>
                   <span className="text-xs text-zinc-400">/ month</span>
                 </div>
 
@@ -475,23 +478,23 @@ export default function LandingPage() {
               <Link
                 href="/login"
                 prefetch={false}
-                className="mt-8 block text-center rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 text-xs font-semibold text-zinc-200 hover:border-zinc-700 hover:text-white transition-all"
+                className="mt-8 block text-center rounded-lg border border-zinc-800/80 bg-zinc-900 py-2.5 text-xs font-semibold text-zinc-200 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 Get Started
               </Link>
             </div>
 
             {/* Pro Plan (Featured) */}
-            <div className="relative rounded-2xl border-2 border-cyan-500 bg-zinc-900/80 p-7 flex flex-col justify-between shadow-2xl shadow-cyan-500/15">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-cyan-500 to-indigo-600 px-3 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+            <div className="relative rounded-xl border border-cyan-500/30 bg-zinc-900 p-7 flex flex-col justify-between shadow-2xl shadow-cyan-500/10">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-md border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 px-3 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
                 Most Popular
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white">Pro</h3>
-                <p className="text-xs text-zinc-400 mt-1">Full 24/7 receptionist coverage for active practices</p>
+                <h3 className="text-lg font-bold tracking-wide text-zinc-100">Pro</h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">Full 24/7 receptionist coverage for active practices</p>
                 <div className="mt-5 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-white font-mono">$499</span>
+                  <span className="text-4xl font-extrabold tracking-tight text-white font-mono">$499</span>
                   <span className="text-xs text-zinc-400">/ month</span>
                 </div>
 
@@ -526,19 +529,19 @@ export default function LandingPage() {
               <Link
                 href="/login"
                 prefetch={false}
-                className="mt-8 block text-center rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 py-3 text-xs font-bold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all"
+                className="mt-8 block text-center rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 py-3 text-xs font-bold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 Start 14-Day Free Trial
               </Link>
             </div>
 
             {/* Enterprise Plan */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-7 flex flex-col justify-between">
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-7 flex flex-col justify-between hover:border-zinc-700 transition-all">
               <div>
-                <h3 className="text-lg font-bold text-white">Enterprise</h3>
-                <p className="text-xs text-zinc-400 mt-1">Multi-location groups, hospitals & high-volume DSOs</p>
+                <h3 className="text-lg font-bold tracking-wide text-zinc-100">Enterprise</h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">Multi-location groups, hospitals & high-volume DSOs</p>
                 <div className="mt-5 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-white font-mono">$999</span>
+                  <span className="text-4xl font-extrabold tracking-tight text-white font-mono">$999</span>
                   <span className="text-xs text-zinc-400">/ month</span>
                 </div>
 
@@ -569,7 +572,7 @@ export default function LandingPage() {
               <Link
                 href="/login"
                 prefetch={false}
-                className="mt-8 block text-center rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 text-xs font-semibold text-zinc-200 hover:border-zinc-700 hover:text-white transition-all"
+                className="mt-8 block text-center rounded-lg border border-zinc-800/80 bg-zinc-900 py-2.5 text-xs font-semibold text-zinc-200 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 Contact Sales
               </Link>

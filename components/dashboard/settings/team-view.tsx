@@ -133,15 +133,15 @@ export function TeamView() {
       )}
 
       {/* Top Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 backdrop-blur-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-5 backdrop-blur-sm">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
               <Users className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-semibold text-white">Team & Staff Access</h2>
+            <h2 className="text-base font-bold tracking-wide text-zinc-100">Team & Staff Access</h2>
           </div>
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1 text-xs text-zinc-400 leading-relaxed">
             Manage practice receptionists, clinic administrators, and providers with HIPAA-compliant role-based access.
           </p>
         </div>
@@ -152,7 +152,7 @@ export function TeamView() {
             setErrorMessage(null);
             setIsInviteModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all shrink-0"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 hover:from-cyan-400 hover:to-indigo-500 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50 shrink-0"
         >
           <UserPlus className="h-4 w-4" />
           <span>Invite Team Member</span>
@@ -161,24 +161,24 @@ export function TeamView() {
 
       {/* Stats Quick Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3.5">
-          <span className="text-[11px] font-medium text-zinc-400">Total Staff</span>
-          <p className="mt-1 text-lg font-bold text-white">{members.length}</p>
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Total Staff</span>
+          <p className="mt-1 text-lg font-extrabold tracking-tight text-white">{members.length}</p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3.5">
-          <span className="text-[11px] font-medium text-zinc-400">Administrators</span>
-          <p className="mt-1 text-lg font-bold text-cyan-400">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Administrators</span>
+          <p className="mt-1 text-lg font-extrabold tracking-tight text-cyan-400">
             {members.filter((m) => m.role === "ADMIN" || m.role === "OWNER").length}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3.5">
-          <span className="text-[11px] font-medium text-zinc-400">Operators & Desk</span>
-          <p className="mt-1 text-lg font-bold text-emerald-400">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Operators & Desk</span>
+          <p className="mt-1 text-lg font-extrabold tracking-tight text-emerald-400">
             {members.filter((m) => m.role === "OPERATOR").length}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3.5">
-          <span className="text-[11px] font-medium text-zinc-400">Security Standard</span>
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Security Standard</span>
           <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
             <Lock className="h-3 w-3 text-cyan-400" /> HIPAA RBAC
           </p>
@@ -193,16 +193,16 @@ export function TeamView() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter staff by name or email..."
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 py-2.5 pl-10 pr-4 text-xs text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          className="w-full rounded-lg border border-zinc-800/80 bg-zinc-900/60 py-2.5 pl-10 pr-4 text-xs text-zinc-200 placeholder-zinc-500 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         />
       </div>
 
       {/* Staff Table */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden backdrop-blur-sm">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 overflow-hidden backdrop-blur-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-zinc-800/80 bg-zinc-900/70 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+              <tr className="border-b border-zinc-800/80 bg-zinc-900/70 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                 <th className="px-5 py-3.5">Member Name</th>
                 <th className="px-5 py-3.5">Email Address</th>
                 <th className="px-5 py-3.5">Access Role</th>
@@ -210,7 +210,7 @@ export function TeamView() {
                 <th className="px-5 py-3.5 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/50">
+            <tbody className="divide-y divide-zinc-800/60">
               {loading ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-zinc-500">
@@ -236,7 +236,7 @@ export function TeamView() {
                     : "ST";
 
                   return (
-                    <tr key={member.id} className="hover:bg-zinc-800/30 transition-colors">
+                    <tr key={member.id} className="hover:bg-zinc-900 transition-colors">
                       {/* Name & Avatar */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -258,7 +258,7 @@ export function TeamView() {
                       {/* Role Badge */}
                       <td className="px-5 py-3.5">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-semibold border ${style.bg} ${style.text} ${style.border}`}
+                          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold border ${style.bg} ${style.text} ${style.border}`}
                         >
                           <Shield className="h-3 w-3" />
                           {member.role}
@@ -293,23 +293,23 @@ export function TeamView() {
       {/* Invite Modal */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+          <div className="w-full max-w-md rounded-xl border border-zinc-800/80 bg-zinc-950 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
               <div className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4 text-cyan-400" />
-                <h3 className="text-sm font-semibold text-white">Invite Team Member</h3>
+                <h3 className="text-sm font-bold tracking-wide text-zinc-100">Invite Team Member</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsInviteModalOpen(false)}
-                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {errorMessage && (
-              <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-300">
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-300">
                 <ShieldAlert className="h-4 w-4 text-rose-400 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -317,7 +317,7 @@ export function TeamView() {
 
             <form onSubmit={handleInvite} className="mt-4 space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
                   Email Address *
                 </label>
                 <div className="relative">
@@ -328,13 +328,13 @@ export function TeamView() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="doctor@practice.com"
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-9 pr-3 text-xs text-zinc-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    className="w-full rounded-lg border border-zinc-800/80 bg-zinc-900 py-2.5 pl-9 pr-3 text-xs text-zinc-100 placeholder-zinc-500 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
                   Full Name (Optional)
                 </label>
                 <div className="relative">
@@ -344,19 +344,19 @@ export function TeamView() {
                     value={inviteName}
                     onChange={(e) => setInviteName(e.target.value)}
                     placeholder="Dr. Alexander Wright"
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-9 pr-3 text-xs text-zinc-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    className="w-full rounded-lg border border-zinc-800/80 bg-zinc-900 py-2.5 pl-9 pr-3 text-xs text-zinc-100 placeholder-zinc-500 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
                   Role & Permissions
                 </label>
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as RoleType)}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 px-3 text-xs text-zinc-100 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  className="w-full rounded-lg border border-zinc-800/80 bg-zinc-900 py-2.5 px-3 text-xs text-zinc-100 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   <option value="OPERATOR">Operator — Front desk, call monitoring & appointment bookings</option>
                   <option value="ADMIN">Admin — Full practice configuration, telephony & AI tuning</option>
@@ -367,18 +367,18 @@ export function TeamView() {
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+              <div className="mt-6 flex items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
                 <button
                   type="button"
                   onClick={() => setIsInviteModalOpen(false)}
-                  className="rounded-xl border border-zinc-800 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+                  className="rounded-lg border border-zinc-800/80 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 hover:from-cyan-400 hover:to-indigo-500 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <span>Sending Invite...</span>

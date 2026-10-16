@@ -273,18 +273,21 @@ export default function DashboardOverviewPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
               Receptionist Overview
             </h1>
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/60 px-2 py-0.5 text-xs font-medium text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-950/60 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
               Live Answering
             </span>
           </div>
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
             AI Receptionist &ldquo;Sarah&rdquo; is managing inbound calls for{" "}
-            <span className="font-medium text-zinc-200">
+            <span className="font-semibold text-zinc-200">
               Apex Health &amp; Dental
             </span>
             .
@@ -296,7 +299,7 @@ export default function DashboardOverviewPage() {
           <Link
             href="/dashboard/agent"
             prefetch={false}
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs font-semibold text-zinc-200 shadow-sm hover:border-zinc-700 hover:text-white transition-all"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3.5 py-2 text-xs font-semibold text-zinc-200 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <Sliders className="h-3.5 w-3.5 text-zinc-400" />
             <span>Tune Agent Prompt</span>
@@ -305,7 +308,7 @@ export default function DashboardOverviewPage() {
           <Link
             href="/dashboard/agent"
             prefetch={false}
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all"
+            className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <Play className="h-3.5 w-3.5 fill-current" />
             <span>Simulate Voice Call</span>
@@ -315,29 +318,29 @@ export default function DashboardOverviewPage() {
 
       {/* Financial Yield & Staff Preserved Hours Banner */}
       {analyticsSummary && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-cyan-950/40 via-zinc-900/40 to-indigo-950/40 p-4 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-cyan-500/30 bg-zinc-900/60 p-4 backdrop-blur-sm shadow-md shadow-cyan-500/10">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
               <TrendingUp className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-white">
+              <p className="text-xs font-bold tracking-wide text-zinc-100">
                 Autonomous Front-Desk Operational Yield
               </p>
-              <p className="text-[11px] text-zinc-400">
-                AI Receptionist has preserved <span className="text-cyan-300 font-medium">{analyticsSummary.hoursSavedFormatted}</span> of staff hours with a <span className="text-emerald-400 font-medium">{analyticsSummary.deflectionRatePercent}%</span> deflection rate.
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                AI Receptionist has preserved <span className="text-cyan-400 font-semibold">{analyticsSummary.hoursSavedFormatted}</span> of staff hours with a <span className="text-emerald-400 font-semibold">{analyticsSummary.deflectionRatePercent}%</span> deflection rate.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-4 self-end sm:self-auto">
             <div className="text-right">
-              <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Net Labor Saved</span>
-              <span className="text-sm font-bold text-emerald-400">{analyticsSummary.netLaborSavedFormatted}</span>
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">Net Labor Saved</span>
+              <span className="text-sm font-extrabold tracking-tight text-emerald-400 font-mono">{analyticsSummary.netLaborSavedFormatted}</span>
             </div>
-            <div className="h-6 w-px bg-zinc-800" />
+            <div className="h-6 w-px bg-zinc-800/80" />
             <div className="text-right">
-              <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Pipeline Yield</span>
-              <span className="text-sm font-bold text-cyan-400">{analyticsSummary.revenueYieldFormatted}</span>
+              <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-semibold block">Pipeline Yield</span>
+              <span className="text-sm font-extrabold tracking-tight text-cyan-400 font-mono">{analyticsSummary.revenueYieldFormatted}</span>
             </div>
           </div>
         </div>
@@ -350,10 +353,10 @@ export default function DashboardOverviewPage() {
           return (
             <div
               key={card.id}
-              className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-5 backdrop-blur-sm transition-colors hover:border-zinc-700/80"
+              className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-5 backdrop-blur-sm transition-all duration-200 hover:border-cyan-500/30 hover:bg-zinc-900"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-zinc-400">
+                <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">
                   {card.label}
                 </span>
                 <div
@@ -363,12 +366,12 @@ export default function DashboardOverviewPage() {
                 </div>
               </div>
               <div className="mt-3">
-                <div className="text-2xl font-bold tracking-tight text-white">
+                <div className="text-2xl font-extrabold tracking-tight text-white">
                   {card.value}
                 </div>
                 <div className="mt-1 flex items-center gap-1.5 text-xs">
                   <span
-                    className={`flex items-center font-medium ${
+                    className={`flex items-center font-semibold ${
                       card.changeDirection === "up"
                         ? "text-emerald-400"
                         : card.changeDirection === "down"
@@ -390,21 +393,21 @@ export default function DashboardOverviewPage() {
       {/* ── Main Content Grid: Recent Calls + Upcoming Appointments ──── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* ── Recent Call Activity Table (spans 2 cols) ────────────────── */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm lg:col-span-2">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm lg:col-span-2">
           {/* Section Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800/70 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-zinc-800/80 px-5 py-4">
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="text-base font-bold tracking-wide text-zinc-100">
                 Recent Call Activity
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-400 leading-relaxed">
                 Last 5 inbound calls with outcomes
               </p>
             </div>
             <Link
               href="/dashboard/calls"
               prefetch={false}
-              className="text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded-md px-1"
             >
               View All Logs &rarr;
             </Link>
@@ -414,34 +417,34 @@ export default function DashboardOverviewPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-800/60">
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                <tr className="border-b border-zinc-800/80">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Caller Phone
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Duration
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Outcome
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Time
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 text-right">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">
                     Action
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/50">
+              <tbody className="divide-y divide-zinc-800/80">
                 {calls.map((call) => (
                   <tr
                     key={call.id}
-                    className="group transition-colors hover:bg-zinc-800/20"
+                    className="group transition-colors hover:bg-zinc-900"
                   >
                     {/* Caller Phone */}
                     <td className="whitespace-nowrap px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700/60 text-zinc-400">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800/80 text-zinc-400">
                           <Phone className="h-3 w-3" />
                         </div>
                         <span className="font-mono text-xs text-zinc-200">
@@ -461,7 +464,7 @@ export default function DashboardOverviewPage() {
                     {/* Outcome Badge */}
                     <td className="whitespace-nowrap px-5 py-3.5">
                       <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${
+                        className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide ${
                           outcomeBadgeStyles[call.outcome as CallOutcome] || outcomeBadgeStyles.Inquiry
                         }`}
                       >
@@ -479,7 +482,7 @@ export default function DashboardOverviewPage() {
                       <Link
                         href="/dashboard/calls"
                         prefetch={false}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-850 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 transition-all hover:border-cyan-500/40 hover:text-cyan-400 hover:bg-zinc-800/80"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-2.5 py-1.5 text-[11px] font-semibold text-zinc-300 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:text-cyan-400 hover:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                       >
                         <FileText className="h-3 w-3" />
                         <span>View Transcript</span>
@@ -493,15 +496,15 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* ── Upcoming Appointments Widget (1 col) ─────────────────────── */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm">
           {/* Section Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800/70 px-5 py-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400">
+          <div className="flex items-center justify-between border-b border-zinc-800/80 px-5 py-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
                 <CalendarCheck className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-zinc-100">
+                <h3 className="text-sm font-bold tracking-wide text-zinc-100">
                   Upcoming Appointments
                 </h3>
                 <p className="text-[11px] text-zinc-400">
@@ -512,7 +515,7 @@ export default function DashboardOverviewPage() {
             <Link
               href="/dashboard/appointments"
               prefetch={false}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200 transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:border-cyan-500/30 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               title="View all appointments"
             >
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -520,13 +523,13 @@ export default function DashboardOverviewPage() {
           </div>
 
           {/* Appointment List */}
-          <div className="divide-y divide-zinc-800/50 px-5">
+          <div className="divide-y divide-zinc-800/80 px-5">
             {appointments.map((appt: UpcomingAppointment) => (
               <div key={appt.id} className="py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
                     {/* Avatar */}
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-indigo-600 text-[11px] font-semibold text-white shadow-sm">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-indigo-600 text-[11px] font-semibold text-white shadow-sm ring-1 ring-zinc-700">
                       {appt.customerName
                         .split(" ")
                         .map((n: string) => n[0])
@@ -534,7 +537,7 @@ export default function DashboardOverviewPage() {
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-100">
+                      <p className="truncate text-sm font-bold tracking-wide text-zinc-100">
                         {appt.customerName}
                       </p>
                       <p className="flex items-center gap-1 text-[11px] text-zinc-400 font-mono">
@@ -546,10 +549,10 @@ export default function DashboardOverviewPage() {
                 </div>
 
                 <div className="mt-2.5 ml-12 flex items-center gap-2">
-                  <span className="rounded bg-zinc-800/80 border border-zinc-700/50 px-2 py-0.5 text-[10px] font-medium text-zinc-300">
+                  <span className="rounded-md bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
                     {appt.date}
                   </span>
-                  <span className="text-[10px] text-zinc-400">
+                  <span className="text-[11px] text-zinc-400 font-mono">
                     {appt.timeSlot}
                   </span>
                 </div>
@@ -558,11 +561,11 @@ export default function DashboardOverviewPage() {
           </div>
 
           {/* Footer CTA */}
-          <div className="border-t border-zinc-800/70 px-5 py-3">
+          <div className="border-t border-zinc-800/80 px-5 py-3">
             <Link
               href="/dashboard/appointments"
               prefetch={false}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-800/70 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-700/60 hover:text-white transition-colors"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900 py-2 text-xs font-semibold text-zinc-200 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             >
               <span>View All Appointments</span>
               <ArrowUpRight className="h-3.5 w-3.5" />

@@ -42,7 +42,7 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
       {/* Drawer Panel */}
       <div
         ref={drawerRef}
-        className="relative z-10 flex h-full w-full max-w-lg flex-col border-l border-zinc-800 bg-zinc-950 shadow-2xl"
+        className="relative z-10 flex h-full w-full max-w-lg flex-col border-l border-zinc-800/80 bg-zinc-950 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label="Call Transcript"
@@ -51,11 +51,11 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
         <div className="flex items-center justify-between border-b border-zinc-800/80 px-5 py-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-white">
+              <h2 className="text-base font-extrabold tracking-tight text-white">
                 {call.callId}
               </h2>
               <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${statusBadgeStyles[call.status]}`}
+                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide ${statusBadgeStyles[call.status]}`}
               >
                 {call.status}
               </span>
@@ -67,7 +67,7 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:border-cyan-500/30 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             aria-label="Close transcript"
           >
             <X className="h-4 w-4" />
@@ -77,22 +77,22 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
         {/* ── Scrollable Content ────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto">
           {/* AI Summary & Key Takeaways */}
-          <div className="border-b border-zinc-800/70 px-5 py-4 space-y-3">
+          <div className="border-b border-zinc-800/80 px-5 py-4 space-y-3">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
                 <Sparkles className="h-3.5 w-3.5" />
               </div>
-              <h3 className="text-sm font-semibold text-zinc-100">
+              <h3 className="text-sm font-bold tracking-wide text-zinc-100">
                 AI Summary
               </h3>
             </div>
-            <p className="text-xs leading-relaxed text-zinc-300">
+            <p className="text-xs leading-relaxed text-zinc-400">
               {call.aiSummary}
             </p>
 
             {/* Key Takeaways */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                 Key Takeaways
               </span>
               <ul className="space-y-1">
@@ -107,10 +107,10 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
           </div>
 
           {/* Audio Player */}
-          <div className="border-b border-zinc-800/70 px-5 py-4">
+          <div className="border-b border-zinc-800/80 px-5 py-4">
             <div className="flex items-center gap-2 mb-3">
               <Volume2 className="h-4 w-4 text-cyan-400" />
-              <h3 className="text-sm font-semibold text-zinc-100">
+              <h3 className="text-sm font-bold tracking-wide text-zinc-100">
                 Call Recording
               </h3>
             </div>
@@ -120,8 +120,8 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
           {/* Transcript Chat Bubbles */}
           <div className="px-5 py-4">
             <div className="flex items-center gap-2 mb-4">
-              <PhoneCall className="h-4 w-4 text-violet-400" />
-              <h3 className="text-sm font-semibold text-zinc-100">
+              <PhoneCall className="h-4 w-4 text-cyan-400" />
+              <h3 className="text-sm font-bold tracking-wide text-zinc-100">
                 Full Transcript
               </h3>
             </div>
@@ -136,24 +136,24 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
                 >
                   {/* AI Avatar (left side) */}
                   {msg.role === "ai" && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-indigo-600 text-white shadow-sm">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-indigo-600 text-white shadow-sm ring-1 ring-zinc-700">
                       <Bot className="h-3.5 w-3.5" />
                     </div>
                   )}
 
                   {/* Bubble */}
                   <div
-                    className={`max-w-[80%] rounded-xl px-3.5 py-2.5 ${
+                    className={`max-w-[80%] rounded-lg px-3.5 py-2.5 ${
                       msg.role === "user"
-                        ? "bg-cyan-600/20 border border-cyan-500/20 text-zinc-100"
-                        : "bg-zinc-800/70 border border-zinc-700/50 text-zinc-200"
+                        ? "bg-cyan-950/40 border border-cyan-500/30 text-zinc-100"
+                        : "bg-zinc-900/60 border border-zinc-800/80 text-zinc-200"
                     }`}
                   >
                     <p className="text-xs leading-relaxed">{msg.text}</p>
                     <p
                       className={`mt-1 text-[10px] font-mono ${
                         msg.role === "user"
-                          ? "text-cyan-400/60"
+                          ? "text-cyan-400/70"
                           : "text-zinc-500"
                       }`}
                     >
@@ -163,7 +163,7 @@ export function TranscriptDrawer({ call, onClose }: TranscriptDrawerProps) {
 
                   {/* User Avatar (right side) */}
                   {msg.role === "user" && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800/80 text-zinc-300">
                       <User className="h-3.5 w-3.5" />
                     </div>
                   )}

@@ -599,7 +599,7 @@ export function LiveTestWidget({
 
   return (
     <div
-      className={`rounded-2xl border border-zinc-800 bg-zinc-950/95 shadow-2xl backdrop-blur-xl transition-all ${
+      className={`rounded-xl border border-zinc-800/80 bg-zinc-950/95 shadow-2xl backdrop-blur-md transition-all ${
         isFloating
           ? "fixed bottom-5 right-5 z-50 w-[92vw] max-w-md border-cyan-500/30 ring-1 ring-cyan-500/20"
           : "w-full"
@@ -623,7 +623,7 @@ export function LiveTestWidget({
                 Live Web Call Test
               </span>
               <span
-                className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+                className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
                   callState === "connected"
                     ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                     : callState === "ringing" || callState === "connecting"
@@ -653,7 +653,7 @@ export function LiveTestWidget({
               <button
                 type="button"
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 aria-label={isMinimized ? "Expand" : "Minimize"}
               >
                 {isMinimized ? (
@@ -666,7 +666,7 @@ export function LiveTestWidget({
                 <button
                   type="button"
                   onClick={onCloseFloating}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   aria-label="Close test call window"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -681,13 +681,13 @@ export function LiveTestWidget({
         <div className="p-4 space-y-4">
           {/* Main Visual Call Screen */}
           {callState === "idle" && (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-gradient-to-b from-zinc-900/40 to-zinc-950 p-6 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800/80 bg-gradient-to-b from-zinc-900/40 to-zinc-950 p-6 text-center">
               <div className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-lg shadow-cyan-500/10">
                 <Bot className="h-8 w-8" />
                 <span className="absolute -bottom-1 -right-1 flex h-4 w-4 rounded-full bg-emerald-500 ring-2 ring-zinc-950" />
               </div>
 
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-bold tracking-wide text-zinc-100">
                 Test Your Configured Agent
               </h4>
               <p className="mt-1 text-xs text-zinc-400 max-w-xs leading-relaxed">
@@ -695,18 +695,18 @@ export function LiveTestWidget({
               </p>
 
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[11px] text-zinc-300">
-                <span className="rounded-full bg-zinc-900 border border-zinc-800 px-2.5 py-0.5">
-                  Voice: <strong className="text-cyan-300">{activeVoice.name}</strong>
+                <span className="rounded-md bg-zinc-900 border border-zinc-800/80 px-2.5 py-0.5">
+                  Voice: <strong className="text-cyan-400">{activeVoice.name}</strong>
                 </span>
-                <span className="rounded-full bg-zinc-900 border border-zinc-800 px-2.5 py-0.5">
-                  Tone: <strong className="text-cyan-300">{config.conversationTone}</strong>
+                <span className="rounded-md bg-zinc-900 border border-zinc-800/80 px-2.5 py-0.5">
+                  Tone: <strong className="text-cyan-400">{config.conversationTone}</strong>
                 </span>
               </div>
 
               <button
                 type="button"
                 onClick={handleStartCall}
-                className="mt-5 group relative flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-6 py-3 text-xs font-bold text-white shadow-xl shadow-cyan-500/25 transition-all hover:scale-[1.02] hover:shadow-cyan-500/40 active:scale-[0.98]"
+                className="mt-5 group relative flex items-center justify-center gap-2.5 rounded-lg bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 <Phone className="h-4 w-4 animate-bounce" />
                 <span>Start Live Test Call</span>
@@ -715,7 +715,7 @@ export function LiveTestWidget({
           )}
 
           {(callState === "connecting" || callState === "ringing") && (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 text-center">
               <div className="relative mb-4 flex h-20 w-20 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-30" />
                 <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-xl shadow-cyan-500/30">
@@ -723,7 +723,7 @@ export function LiveTestWidget({
                 </div>
               </div>
 
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-bold tracking-wide text-zinc-100">
                 {callState === "connecting"
                   ? "Dialing Virtual Receptionist..."
                   : "Ringing Phone Line..."}
@@ -735,7 +735,7 @@ export function LiveTestWidget({
               <button
                 type="button"
                 onClick={handleEndCall}
-                className="mt-5 flex items-center gap-2 rounded-lg bg-rose-600/20 border border-rose-500/40 px-4 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-600/30 transition-colors"
+                className="mt-5 flex items-center gap-2 rounded-lg bg-rose-500/15 border border-rose-500/40 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/25 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 <PhoneOff className="h-3.5 w-3.5" /> Cancel Call
               </button>
@@ -745,10 +745,13 @@ export function LiveTestWidget({
           {callState === "connected" && (
             <div className="space-y-3">
               {/* Dynamic Waveform Visualizer & Status */}
-              <div className="rounded-xl border border-zinc-800/80 bg-gradient-to-b from-zinc-900/70 to-zinc-950 p-3.5">
+              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3.5">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                    </span>
                     <span className="font-semibold text-zinc-200">
                       {config.agentName}
                     </span>
@@ -756,13 +759,13 @@ export function LiveTestWidget({
                       ({activeVoice.name})
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 rounded px-1.5 py-0.5">
+                  <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 rounded-md px-1.5 py-0.5">
                     {isAgentSpeaking ? "Agent Speaking 🎙️" : "Listening for Caller 👂"}
                   </span>
                 </div>
 
                 {/* Animated Waveform Visualizer */}
-                <div className="mt-3 flex h-12 w-full items-center justify-center gap-1 overflow-hidden rounded-lg bg-zinc-950/80 p-2 border border-zinc-800/60">
+                <div className="mt-3 flex h-12 w-full items-center justify-center gap-1 overflow-hidden rounded-lg bg-zinc-950/80 p-2 border border-zinc-800/80">
                   {Array.from({ length: 28 }).map((_, i) => {
                     const heightPercent = isAgentSpeaking
                       ? WAVEFORM_HEIGHTS_AGENT[i % WAVEFORM_HEIGHTS_AGENT.length]
@@ -773,7 +776,7 @@ export function LiveTestWidget({
                     return (
                       <span
                         key={i}
-                        className={`w-1 rounded-full transition-all duration-200 ${
+                        className={`w-1 rounded-sm transition-all duration-200 ${
                           isAgentSpeaking
                             ? "bg-gradient-to-t from-cyan-500 via-indigo-500 to-violet-400 animate-pulse"
                             : isListeningMic
@@ -789,7 +792,7 @@ export function LiveTestWidget({
                 </div>
 
                 {/* Audio Telemetry Bar */}
-                <div className="mt-2.5 flex items-center justify-between text-[10px] text-zinc-400 border-t border-zinc-800/60 pt-2">
+                <div className="mt-2.5 flex items-center justify-between text-[10px] text-zinc-400 border-t border-zinc-800/80 pt-2">
                   <span>Latency: ~180ms</span>
                   <span>Opus 48kHz Stereo</span>
                   <span>Packet Loss: 0%</span>
@@ -815,10 +818,10 @@ export function LiveTestWidget({
                     )}
 
                     <div
-                      className={`max-w-[82%] rounded-xl px-3 py-2 leading-relaxed ${
+                      className={`max-w-[82%] rounded-lg px-3 py-2 leading-relaxed ${
                         msg.sender === "caller"
                           ? "bg-cyan-600/20 text-cyan-100 border border-cyan-500/30"
-                          : "bg-zinc-800/90 text-zinc-200 border border-zinc-700/60"
+                          : "bg-zinc-900 text-zinc-200 border border-zinc-800/80"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-3 text-[10px] text-zinc-400 mb-0.5">
@@ -841,7 +844,7 @@ export function LiveTestWidget({
 
               {/* Quick Sample Questions */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1.5">
                   Click to Ask Agent:
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -850,7 +853,7 @@ export function LiveTestWidget({
                       key={idx}
                       type="button"
                       onClick={() => handleSendUserInput(prompt)}
-                      className="rounded-lg border border-zinc-800 bg-zinc-900/70 px-2 py-1 text-[11px] text-zinc-300 hover:border-cyan-500/40 hover:bg-zinc-800 hover:text-white transition-colors"
+                      className="rounded-md border border-zinc-800/80 bg-zinc-900/60 px-2 py-1 text-[11px] text-zinc-300 hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                     >
                       {prompt}
                     </button>
@@ -863,10 +866,10 @@ export function LiveTestWidget({
                 <button
                   type="button"
                   onClick={toggleSpeechRecognition}
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                     isListeningMic
                       ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 animate-pulse"
-                      : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                      : "bg-zinc-900 border-zinc-800/80 text-zinc-400 hover:text-zinc-200"
                   }`}
                   title={
                     isListeningMic
@@ -885,13 +888,13 @@ export function LiveTestWidget({
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleSendUserInput();
                   }}
-                  className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3 py-2 text-xs text-white placeholder-zinc-500 focus:border-cyan-500/60 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                  className="flex-1 rounded-lg border border-zinc-800/80 bg-zinc-900 px-3 py-2 text-xs text-white placeholder-zinc-500 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 />
 
                 <button
                   type="button"
                   onClick={() => handleSendUserInput()}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-600 text-white hover:bg-cyan-500 transition-colors"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-600 text-white hover:bg-cyan-500 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                   aria-label="Send message"
                 >
                   <Send className="h-4 w-4" />
@@ -904,10 +907,10 @@ export function LiveTestWidget({
                   <button
                     type="button"
                     onClick={() => setIsMuted(!isMuted)}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs transition-colors ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                       isMuted
                         ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
-                        : "bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800"
+                        : "bg-zinc-900 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800"
                     }`}
                     title={isMuted ? "Unmute microphone" : "Mute microphone"}
                   >
@@ -929,10 +932,10 @@ export function LiveTestWidget({
                       }
                       setIsSpeakerMuted(!isSpeakerMuted);
                     }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs transition-colors ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                       isSpeakerMuted
                         ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
-                        : "bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800"
+                        : "bg-zinc-900 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800"
                     }`}
                     title={
                       isSpeakerMuted
@@ -951,7 +954,7 @@ export function LiveTestWidget({
                 <button
                   type="button"
                   onClick={handleEndCall}
-                  className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-rose-600/30 hover:bg-rose-500 transition-all"
+                  className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-rose-600/20 hover:bg-rose-500 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   <PhoneOff className="h-3.5 w-3.5" />
                   <span>End Call</span>
@@ -961,12 +964,12 @@ export function LiveTestWidget({
           )}
 
           {callState === "ended" && (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 text-center">
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
 
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-bold tracking-wide text-zinc-100">
                 Test Call Completed
               </h4>
               <p className="mt-1 text-xs text-zinc-400">
@@ -974,19 +977,19 @@ export function LiveTestWidget({
               </p>
 
               <div className="mt-4 grid w-full grid-cols-3 gap-2 text-center text-xs">
-                <div className="rounded-lg bg-zinc-950 p-2 border border-zinc-800">
+                <div className="rounded-lg bg-zinc-950 p-2 border border-zinc-800/80">
                   <p className="text-[10px] text-zinc-400">Duration</p>
                   <p className="font-semibold text-zinc-200">
                     {formatTimer(callDuration)}
                   </p>
                 </div>
-                <div className="rounded-lg bg-zinc-950 p-2 border border-zinc-800">
+                <div className="rounded-lg bg-zinc-950 p-2 border border-zinc-800/80">
                   <p className="text-[10px] text-zinc-400">Turns</p>
                   <p className="font-semibold text-zinc-200">
                     {transcript.length}
                   </p>
                 </div>
-                <div className="rounded-lg bg-zinc-950 p-2 border border-zinc-800">
+                <div className="rounded-lg bg-zinc-950 p-2 border border-zinc-800/80">
                   <p className="text-[10px] text-zinc-400">Latency</p>
                   <p className="font-semibold text-emerald-400">180ms</p>
                 </div>
@@ -996,7 +999,7 @@ export function LiveTestWidget({
                 <button
                   type="button"
                   onClick={handleResetCall}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 py-2 text-xs font-semibold text-white hover:from-cyan-400 hover:to-indigo-500 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-600 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 hover:from-cyan-400 hover:to-indigo-500 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   <RefreshCw className="h-3.5 w-3.5" /> Start New Test
                 </button>

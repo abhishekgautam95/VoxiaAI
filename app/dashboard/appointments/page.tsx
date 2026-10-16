@@ -285,15 +285,18 @@ export default function AppointmentsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-cyan-400" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Calendar & Visit Management
             </span>
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-white">
             Appointments & Schedule
           </h1>
-          <p className="mt-1 text-xs text-zinc-400">
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
             Appointments scheduled directly by your AI voice receptionist and clinical team.
           </p>
         </div>
@@ -301,14 +304,14 @@ export default function AppointmentsPage() {
         {/* Action Controls & View Switcher */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Toggle between List View and Calendar View */}
-          <div className="flex items-center rounded-xl border border-zinc-800 bg-zinc-950 p-1 text-xs">
+          <div className="flex items-center rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-1 text-xs">
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-colors ${
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                 viewMode === "list"
-                  ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                  ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
               }`}
             >
               <List className="h-3.5 w-3.5" />
@@ -318,10 +321,10 @@ export default function AppointmentsPage() {
             <button
               type="button"
               onClick={() => setViewMode("calendar")}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-medium transition-colors ${
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-semibold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                 viewMode === "calendar"
-                  ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
+                  ? "border-cyan-500/30 bg-zinc-900 text-white shadow-md shadow-cyan-500/10"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"
               }`}
             >
               <Calendar className="h-3.5 w-3.5" />
@@ -333,7 +336,7 @@ export default function AppointmentsPage() {
           <button
             type="button"
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-xs font-medium text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2 text-xs font-semibold text-zinc-300 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             title="Download all appointments as CSV spreadsheet"
           >
             <Download className="h-3.5 w-3.5 text-zinc-400" />
@@ -344,7 +347,7 @@ export default function AppointmentsPage() {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-indigo-500 transition-all active:scale-[0.98]"
+            className="flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <Plus className="h-4 w-4" />
             <span>Add Appointment</span>
@@ -355,35 +358,38 @@ export default function AppointmentsPage() {
       {/* Stats Bar at Top */}
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Total Today */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm shadow-sm">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 backdrop-blur-sm transition-all duration-200 hover:border-cyan-500/30 hover:bg-zinc-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">Total Today</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Total Today</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
               <CalendarDays className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white">
+            <span className="text-2xl font-extrabold tracking-tight text-white">
               {stats.totalToday}
             </span>
             <span className="text-xs text-zinc-400">scheduled</span>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-[11px] text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-400 font-semibold">
+            <span className="flex h-1.5 w-1.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+            </span>
             <span>Live Cal.com / Google Calendar sync</span>
           </div>
         </div>
 
         {/* Upcoming This Week */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm shadow-sm">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 backdrop-blur-sm transition-all duration-200 hover:border-cyan-500/30 hover:bg-zinc-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">Upcoming This Week</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Upcoming This Week</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
               <CalendarCheck className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white">
+            <span className="text-2xl font-extrabold tracking-tight text-white">
               {stats.upcomingThisWeek}
             </span>
             <span className="text-xs text-zinc-400">active visits</span>
@@ -395,39 +401,39 @@ export default function AppointmentsPage() {
         </div>
 
         {/* Cancelled */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm shadow-sm">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 backdrop-blur-sm transition-all duration-200 hover:border-rose-500/30 hover:bg-zinc-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">Cancelled</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Cancelled</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400">
               <XCircle className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-rose-300">
+            <span className="text-2xl font-extrabold tracking-tight text-rose-400">
               {stats.cancelledCount}
             </span>
             <span className="text-xs text-zinc-400">total</span>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-[11px] text-amber-400">
+          <div className="mt-2 flex items-center gap-1 text-[11px] text-amber-400 font-medium">
             <span>Automated reschedule links dispatched</span>
           </div>
         </div>
 
         {/* Completed / Total Ratio */}
-        <div className="hidden lg:block rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 backdrop-blur-sm shadow-sm">
+        <div className="hidden lg:block rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 backdrop-blur-sm transition-all duration-200 hover:border-emerald-500/30 hover:bg-zinc-900">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-400">AI Voice Booking Rate</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">AI Voice Booking Rate</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
               <TrendingUp className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white">
+            <span className="text-2xl font-extrabold tracking-tight text-white">
               86%
             </span>
             <span className="text-xs text-zinc-400">autonomous</span>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-[11px] text-cyan-300">
+          <div className="mt-2 flex items-center gap-1 text-[11px] text-cyan-400 font-semibold">
             <Sparkles className="h-3 w-3" />
             <span>12 booked via inbound voice</span>
           </div>

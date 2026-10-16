@@ -110,37 +110,37 @@ export default function PhoneNumbersPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Telephony Phone Numbers</h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">Telephony Phone Numbers</h1>
+          <p className="mt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
             Provision and configure dedicated toll-free and local numbers assigned to your AI receptionist.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition-colors shadow-sm"
+          className="flex items-center gap-1.5 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:from-cyan-400 hover:to-indigo-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         >
           <Plus className="h-4 w-4" /> Provision New Number
         </button>
       </div>
 
       {actionError && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-950/60 px-3.5 py-2 text-xs text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-950/60 px-3.5 py-2 text-xs text-rose-400">
           {actionError}
         </div>
       )}
 
       {isLoading ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 text-center text-sm text-zinc-400">
           Loading assigned phone numbers...
         </div>
       ) : numbers.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-8 text-center">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 text-center">
           <Phone className="mx-auto h-8 w-8 text-zinc-500" />
-          <p className="mt-2 text-sm text-zinc-300">No phone numbers provisioned yet.</p>
+          <p className="mt-2 text-sm font-bold tracking-wide text-zinc-100">No phone numbers provisioned yet.</p>
           <button
             onClick={() => setShowModal(true)}
-            className="mt-3 text-xs text-cyan-400 hover:underline"
+            className="mt-3 text-xs font-semibold text-cyan-400 hover:underline focus:outline-none"
           >
             Provision your first phone number &rarr;
           </button>
@@ -152,26 +152,26 @@ export default function PhoneNumbersPage() {
             return (
               <div
                 key={item.id}
-                className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 transition-all hover:border-zinc-700"
+                className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 transition-all duration-200 hover:border-cyan-500/30 hover:bg-zinc-900"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-lg border font-mono text-sm ${
                         isActive
-                          ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
-                          : "bg-zinc-800/40 border-zinc-700/40 text-zinc-500"
+                          ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
+                          : "bg-zinc-900 border-zinc-800/80 text-zinc-500"
                       }`}
                     >
                       <Phone className="h-5 w-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-mono text-sm font-semibold text-zinc-100">{item.number}</p>
+                        <p className="font-mono text-sm font-bold tracking-wide text-zinc-100">{item.number}</p>
                         <button
                           type="button"
                           onClick={() => handleCopy(item.id, item.number)}
-                          className="rounded p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
+                          className="rounded-md p-1 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                           title="Copy phone number"
                         >
                           {copiedId === item.id ? (
@@ -180,13 +180,13 @@ export default function PhoneNumbersPage() {
                             <Copy className="h-3.5 w-3.5" />
                           )}
                         </button>
-                        <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                        <span className="rounded-md border border-zinc-800/80 bg-zinc-900 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400">
                           {item.provider}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-400">
+                      <p className="text-xs text-zinc-400 leading-relaxed">
                         {item.label} • {item.cityState} • Assigned to{" "}
-                        <span className="text-cyan-300 font-medium">{item.assignedAgent}</span>
+                        <span className="text-cyan-400 font-semibold">{item.assignedAgent}</span>
                       </p>
                     </div>
                   </div>
@@ -195,10 +195,10 @@ export default function PhoneNumbersPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(item.id, item.status)}
-                      className={`rounded px-2.5 py-1 text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                         isActive
-                          ? "bg-emerald-950/80 border-emerald-800/50 text-emerald-400 hover:bg-emerald-900/60"
-                          : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-200"
+                          ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-400 hover:bg-emerald-900/60"
+                          : "bg-zinc-900 border-zinc-800/80 text-zinc-400 hover:text-zinc-200"
                       }`}
                       title={isActive ? "Click to pause answering" : "Click to activate answering"}
                     >
@@ -209,7 +209,7 @@ export default function PhoneNumbersPage() {
                     <button
                       type="button"
                       onClick={() => handleDeleteNumber(item.id, item.number)}
-                      className="rounded p-1.5 text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-colors"
+                      className="rounded-lg p-1.5 text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/30 transition-colors focus:outline-none focus:ring-1 focus:ring-rose-500/50"
                       title="Release line"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -229,19 +229,19 @@ export default function PhoneNumbersPage() {
             className="fixed inset-0 bg-black/75 backdrop-blur-sm"
             onClick={() => setShowModal(false)}
           />
-          <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Provision Dedicated Phone Line</h3>
-            <p className="mt-1 text-xs text-zinc-400">
+          <div className="relative w-full max-w-md rounded-xl border border-zinc-800/80 bg-zinc-950 p-6 shadow-2xl">
+            <h3 className="text-lg font-extrabold tracking-tight text-white">Provision Dedicated Phone Line</h3>
+            <p className="mt-1 text-xs text-zinc-400 leading-relaxed">
               Instantly allocate a local number connected to your AI voice receptionist SIP trunk.
             </p>
 
             <form onSubmit={handleProvision} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-zinc-300">Target Area Code</label>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Target Area Code</label>
                 <select
                   value={areaCode}
                   onChange={(e) => setAreaCode(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   <option value="415">415 — San Francisco, CA</option>
                   <option value="510">510 — Oakland / East Bay, CA</option>
@@ -252,14 +252,14 @@ export default function PhoneNumbersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300">Line Label</label>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold text-zinc-500">Line Label</label>
                 <input
                   type="text"
                   required
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                   placeholder="e.g. VIP Urgent Care Line"
-                  className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 />
               </div>
 
@@ -267,14 +267,14 @@ export default function PhoneNumbersPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-medium text-zinc-400 hover:text-white"
+                  className="rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2 text-xs font-semibold text-zinc-400 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isProvisioning}
-                  className="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+                  className="rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                 >
                   {isProvisioning ? "Provisioning..." : "Confirm & Provision"}
                 </button>

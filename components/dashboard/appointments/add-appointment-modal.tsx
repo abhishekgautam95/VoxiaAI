@@ -103,15 +103,15 @@ export function AddAppointmentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="relative w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+      <div className="relative w-full max-w-lg rounded-xl border border-zinc-800/80 bg-zinc-950 p-6 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">
+              <h3 className="text-base font-bold tracking-wide text-zinc-100">
                 Manual Appointment Booking
               </h3>
               <p className="text-xs text-zinc-400">
@@ -122,7 +122,7 @@ export function AddAppointmentModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <X className="h-4 w-4" />
           </button>

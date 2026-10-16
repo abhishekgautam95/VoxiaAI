@@ -147,10 +147,10 @@ export default function CallLogsPage() {
         {/* ── Page Header ──────────────────────────────────────────────── */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl font-extrabold tracking-tight text-white">
               Call Logs & Transcripts
             </h1>
-            <p className="mt-1 text-sm text-zinc-400">
+            <p className="mt-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
               Audit recordings, sentiment analysis, and conversational traces for
               all inbound calls.
             </p>
@@ -158,7 +158,7 @@ export default function CallLogsPage() {
           <button
             type="button"
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-2 text-xs font-semibold text-zinc-300 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:bg-zinc-900 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
           >
             <Download className="h-3.5 w-3.5" />
             Export CSV
@@ -166,7 +166,7 @@ export default function CallLogsPage() {
         </div>
 
         {/* ── Search & Filter Bar ──────────────────────────────────────── */}
-        <div className="flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Search */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
@@ -175,7 +175,7 @@ export default function CallLogsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by phone number or call ID..."
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 pl-9 pr-4 py-2 text-xs text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-500/50 focus:outline-none transition-colors"
+              className="w-full rounded-lg border border-zinc-800/80 bg-zinc-950 pl-9 pr-4 py-2 text-xs text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
             />
           </div>
 
@@ -188,7 +188,7 @@ export default function CallLogsPage() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 py-2 pl-8 pr-3 text-xs text-zinc-300 focus:border-cyan-500/50 focus:outline-none transition-colors [color-scheme:dark]"
+                className="rounded-lg border border-zinc-800/80 bg-zinc-950 py-2 pl-8 pr-3 text-xs text-zinc-300 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all [color-scheme:dark]"
                 title="From date"
               />
             </div>
@@ -202,7 +202,7 @@ export default function CallLogsPage() {
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 py-2 pl-8 pr-3 text-xs text-zinc-300 focus:border-cyan-500/50 focus:outline-none transition-colors [color-scheme:dark]"
+                className="rounded-lg border border-zinc-800/80 bg-zinc-950 py-2 pl-8 pr-3 text-xs text-zinc-300 focus:border-cyan-500/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all [color-scheme:dark]"
                 title="To date"
               />
             </div>
@@ -223,7 +223,7 @@ export default function CallLogsPage() {
                   setDateFrom("");
                   setDateTo("");
                 }}
-                className="rounded-lg border border-zinc-700 bg-zinc-800/60 px-2.5 py-2 text-[11px] font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="rounded-lg border border-zinc-800/80 bg-zinc-900 px-2.5 py-2 text-[11px] font-semibold text-zinc-400 hover:border-cyan-500/30 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 Clear All
               </button>
@@ -232,49 +232,49 @@ export default function CallLogsPage() {
         </div>
 
         {/* ── Call Logs Table ──────────────────────────────────────────── */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm overflow-hidden">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-800/60 bg-zinc-900/60">
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                <tr className="border-b border-zinc-800/80 bg-zinc-900/80">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Call ID
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Date / Time
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Duration
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Caller Number
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                     Status
                   </th>
-                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 text-right">
+                  <th className="whitespace-nowrap px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">
                     Recording
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/50">
+              <tbody className="divide-y divide-zinc-800/80">
                 {filteredCalls.length > 0 ? (
                   filteredCalls.map((call) => (
                     <tr
                       key={call.id}
                       onClick={() => setSelectedCall(call)}
-                      className="group cursor-pointer transition-colors hover:bg-zinc-800/30"
+                      className="group cursor-pointer transition-colors hover:bg-zinc-900"
                     >
                       {/* Call ID */}
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        <span className="font-mono text-xs font-medium text-cyan-400">
+                        <span className="font-mono text-xs font-semibold text-cyan-400">
                           {call.callId}
                         </span>
                       </td>
 
                       {/* Date / Time */}
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        <div className="text-xs text-zinc-200">
+                        <div className="text-xs font-medium text-zinc-200">
                           {call.date}
                         </div>
                         <div className="text-[11px] text-zinc-500">
@@ -293,7 +293,7 @@ export default function CallLogsPage() {
                       {/* Caller Number */}
                       <td className="whitespace-nowrap px-5 py-3.5">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700/60 text-zinc-400">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 border border-zinc-800/80 text-zinc-400">
                             <Phone className="h-2.5 w-2.5" />
                           </div>
                           <span className="font-mono text-xs text-zinc-200">
@@ -305,7 +305,7 @@ export default function CallLogsPage() {
                       {/* Status Badge */}
                       <td className="whitespace-nowrap px-5 py-3.5">
                         <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${statusBadgeStyles[call.status]}`}
+                          className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide ${statusBadgeStyles[call.status]}`}
                         >
                           {call.status}
                         </span>
@@ -319,7 +319,7 @@ export default function CallLogsPage() {
                             e.stopPropagation();
                             setSelectedCall(call);
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-850 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 transition-all hover:border-cyan-500/40 hover:text-cyan-400 hover:bg-zinc-800/80"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-2.5 py-1.5 text-[11px] font-semibold text-zinc-300 shadow-md shadow-cyan-500/10 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] hover:border-cyan-500/30 hover:text-cyan-400 hover:bg-zinc-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                         >
                           <Play className="h-3 w-3 fill-current" />
                           <span>Play</span>
@@ -330,13 +330,13 @@ export default function CallLogsPage() {
                 ) : (
                   <tr>
                     <td colSpan={6} className="py-12 text-center">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700/60 text-zinc-500">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800/80 text-zinc-500">
                         <PhoneCall className="h-6 w-6" />
                       </div>
-                      <h3 className="mt-3 text-sm font-semibold text-zinc-300">
+                      <h3 className="mt-3 text-sm font-bold tracking-wide text-zinc-100">
                         No calls found
                       </h3>
-                      <p className="mt-1 text-xs text-zinc-500">
+                      <p className="mt-1 text-xs text-zinc-400">
                         Try adjusting your search or filter criteria.
                       </p>
                     </td>
@@ -347,11 +347,11 @@ export default function CallLogsPage() {
           </div>
 
           {/* Table Footer / Count */}
-          <div className="flex items-center justify-between border-t border-zinc-800/60 px-5 py-3 bg-zinc-900/30">
-            <span className="text-[11px] text-zinc-500">
+          <div className="flex items-center justify-between border-t border-zinc-800/80 px-5 py-3 bg-zinc-900/60">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">
               Showing {filteredCalls.length} of {calls.length} calls
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500">
               Click any row to view transcript
             </span>
           </div>

@@ -177,7 +177,7 @@ export function CalendarView({
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
+                    className={`flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${
                       isToday
                         ? "bg-cyan-500 text-zinc-950 shadow-sm shadow-cyan-500/30"
                         : "text-zinc-300"
@@ -203,7 +203,7 @@ export function CalendarView({
                         key={apt.id}
                         type="button"
                         onClick={() => setSelectedAppointment(apt)}
-                        className={`w-full text-left truncate rounded px-1.5 py-1 text-[10px] font-medium transition-all ${
+                        className={`w-full text-left truncate rounded-md px-1.5 py-1 text-[10px] font-medium transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500/50 ${
                           isCancelled
                             ? "bg-rose-950/40 border border-rose-800/40 text-rose-300 line-through opacity-75"
                             : isCompleted
@@ -227,15 +227,15 @@ export function CalendarView({
       {/* Appointment Detail Popover Modal */}
       {selectedAppointment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-xl border border-zinc-800/80 bg-zinc-950 p-6 shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white">
+                <span className="text-xs font-bold tracking-wide text-zinc-100">
                   Appointment Details
                 </span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${
                     selectedAppointment.status === "Confirmed"
                       ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                       : selectedAppointment.status === "Completed"
@@ -249,7 +249,7 @@ export function CalendarView({
               <button
                 type="button"
                 onClick={() => setSelectedAppointment(null)}
-                className="text-zinc-400 hover:text-white"
+                className="rounded-lg p-1 text-zinc-400 hover:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 <X className="h-4 w-4" />
               </button>
